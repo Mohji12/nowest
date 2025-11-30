@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  nowest-interior-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.lambda
+    ports:
+      - "9000:8080"
+    environment:
+      - AWS_LAMBDA_FUNCTION_NAME=nowestInteriorAPI
+      - DATABASE_URL=mysql+pymysql://admin:Krintix#2025@menteetracker.cfiuwyek2vbk.ap-south-1.rds.amazonaws.com:3306/nowest_interior
+      - SECRET_KEY=nowest-interior-secret-key-2024
+      - SESSION_SECRET=nowest-interior-session-secret-2024
+      - DEBUG=true
+    volumes:
+      - ./:/var/task
+    command: ["main.handler"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add a local MySQL database for testing
+  # mysql:
+  #   image: mysql:8.0
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: rootpassword
+  #     MYSQL_DATABASE: nowest_interior
+  #     MYSQL_USER: admin
+  #     MYSQL_PASSWORD: AKumawat8437
+  #   ports:
+  #     - "3306:3306"
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+
+# volumes:
+#   mysql_data:
