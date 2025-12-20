@@ -20,6 +20,20 @@ class PortfolioService:
     def __init__(self, db: Session):
         self.db = db
     
+    def _convert_portfolio_image(self, portfolio: Portfolio) -> Portfolio:
+        """
+        Convert portfolio image path to full S3 URL if needed.
+        
+        Args:
+            portfolio: Portfolio object
+            
+        Returns:
+            Portfolio with converted image URL
+        """
+        if portfolio.image:
+            portfolio.image = convert_image_to_s3_url(portfolio.image)
+        return portfolio
+    
     def get_all_portfolio(self) -> List[Portfolio]:
         """
         Get all portfolio items ordered by creation date.
@@ -28,7 +42,11 @@ class PortfolioService:
             List of portfolio objects
         """
         try:
-            return self.db.query(Portfolio).order_by(desc(Portfolio.created_at)).all()
+            portfolio_items = self.db.query(Portfolio).order_by(desc(Portfolio.created_at)).all()
+            # Convert image paths to full S3 URLs
+            for portfolio in portfolio_items:
+                self._convert_portfolio_image(portfolio)
+            return portfolio_items
         except Exception as e:
             logger.error(f"Error getting all portfolio items: {e}")
             raise HTTPException(
@@ -47,7 +65,10 @@ class PortfolioService:
             Portfolio object or None
         """
         try:
-            return self.db.query(Portfolio).filter(Portfolio.id == portfolio_id).first()
+            portfolio = self.db.query(Portfolio).filter(Portfolio.id == portfolio_id).first()
+            if portfolio:
+                self._convert_portfolio_image(portfolio)
+            return portfolio
         except Exception as e:
             logger.error(f"Error getting portfolio by ID {portfolio_id}: {e}")
             raise HTTPException(
@@ -173,9 +194,13 @@ class PortfolioService:
             List of portfolio objects
         """
         try:
-            return self.db.query(Portfolio).filter(
+            portfolio_items = self.db.query(Portfolio).filter(
                 Portfolio.category == category
             ).order_by(desc(Portfolio.created_at)).all()
+            # Convert image paths to full S3 URLs
+            for portfolio in portfolio_items:
+                self._convert_portfolio_image(portfolio)
+            return portfolio_items
         except Exception as e:
             logger.error(f"Error getting portfolio by category {category}: {e}")
             raise HTTPException(
@@ -212,11 +237,15 @@ class PortfolioService:
         """
         try:
             search_term = f"%{query}%"
-            return self.db.query(Portfolio).filter(
+            portfolio_items = self.db.query(Portfolio).filter(
                 (Portfolio.title.ilike(search_term)) |
                 (Portfolio.description.ilike(search_term)) |
                 (Portfolio.client.ilike(search_term))
             ).order_by(desc(Portfolio.created_at)).all()
+            # Convert image paths to full S3 URLs
+            for portfolio in portfolio_items:
+                self._convert_portfolio_image(portfolio)
+            return portfolio_items
         except Exception as e:
             logger.error(f"Error searching portfolio: {e}")
             raise HTTPException(

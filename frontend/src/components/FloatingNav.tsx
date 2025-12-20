@@ -68,7 +68,7 @@ export default function FloatingNav({ activeItem = 'home', items = defaultItems 
   // Dynamic sizing based on device type
   const getNavbarClasses = () => {
     if (isMobile) {
-      return "fixed bottom-4 left-1/2 -translate-x-1/2 z-50 backdrop-blur-xl bg-card/90 border border-card-border rounded-full px-2 py-3 shadow-lg max-w-[95vw] overflow-hidden scrollbar-hide";
+      return "fixed bottom-4 left-1/2 -translate-x-1/2 z-50 backdrop-blur-xl bg-card/90 border border-card-border rounded-full px-4 py-3 shadow-lg max-w-[95vw]";
     } else if (isTablet) {
       return "fixed bottom-4 left-1/2 -translate-x-1/2 z-50 backdrop-blur-xl bg-card/90 border border-card-border rounded-full px-6 py-2.5 shadow-lg max-w-[85vw]";
     } else {
@@ -78,7 +78,7 @@ export default function FloatingNav({ activeItem = 'home', items = defaultItems 
 
   const getGapClasses = () => {
     if (isMobile) {
-      return "flex items-center gap-2 flex-nowrap overflow-hidden scrollbar-hide px-2";
+      return "flex items-center gap-2";
     } else if (isTablet) {
       return "flex items-center gap-4";
     } else {
@@ -86,39 +86,27 @@ export default function FloatingNav({ activeItem = 'home', items = defaultItems 
     }
   };
 
-  // For mobile: duplicate items for seamless infinite scroll
-  const mobileItems = isMobile ? [...items, ...items] : items;
-
   return (
     <nav 
       className={getNavbarClasses()}
       data-testid="nav-floating"
     >
-      <ul 
-        className={getGapClasses()}
-        style={isMobile ? {
-          animation: 'scrollRightToLeft 20s linear infinite',
-          width: '200%',
-        } : undefined}
-      >
-        {mobileItems.map((item, index) => {
+      <ul className={getGapClasses()}>
+        {items.map((item) => {
           const Icon = item.icon;
-          // For duplicated items, use original index to determine dropdown state
-          const originalIndex = index >= items.length ? index - items.length : index;
-          const originalItem = items[originalIndex];
           const isActive = activeItem === item.id || (item.subItems && item.subItems.some(sub => activeItem === sub.id));
           const hasDropdown = item.subItems && item.subItems.length > 0;
           const isDropdownOpen = openDropdown === item.id;
 
           return (
-            <li key={`${item.id}-${index}`} className="relative flex-shrink-0">
+            <li key={item.id} className="relative">
               <button
                 onClick={() => handleItemClick(item)}
                 className={`flex flex-col items-center transition-all hover-elevate rounded-md ${
                   isActive ? 'text-primary' : 'text-muted-foreground'
                 } ${
                   isMobile 
-                    ? 'gap-1 px-3 py-2 min-w-[60px]' 
+                    ? 'gap-1 px-3 py-2' 
                     : isTablet 
                     ? 'gap-1 px-3 py-2' 
                     : 'gap-1 px-4 py-2'

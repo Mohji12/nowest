@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import FloatingNav from "@/components/FloatingNav";
 import { usePageViewTracking } from "@/hooks/usePageViewTracking";
-import { Home as HomeIcon, Info, Grid3x3, Package, Phone, Share2, Images, HelpCircle } from 'lucide-react';
+import { Home as HomeIcon, Info, Grid3x3, Package, Phone, Share2 } from 'lucide-react';
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -18,20 +18,11 @@ import OurProcess from "@/pages/OurProcess";
 import Portfolio from "@/pages/Portfolio";
 import Products from "@/pages/Products";
 import Brochures from "@/pages/Brochures";
-import Gallery from "@/pages/Gallery";
-import GalleryDetail from "@/pages/GalleryDetail";
-import ProductTypes from "@/pages/ProductTypes";
-import ProductTypeDetail from "@/pages/ProductTypeDetail";
 import Contact from "@/pages/Contact";
 import SocialReviews from "@/pages/SocialReviews";
-import Support from "@/pages/Support";
 import NotFound from "@/pages/NotFound";
 import APITest from "@/pages/APITest";
 import PortfolioTest from "@/pages/PortfolioTest";
-import Kitchen from "@/pages/Kitchen";
-import Bathroom from "@/pages/Bathroom";
-import Bedroom from "@/pages/Bedroom";
-import LivingRoom from "@/pages/LivingRoom";
 import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminProducts from "@/pages/admin/AdminProducts";
@@ -60,32 +51,12 @@ function Router() {
   usePageViewTracking();
 
   useEffect(() => {
-    const pathParts = location.split('/').filter(Boolean);
-    const firstPath = pathParts[0] || '';
-    
-    // Handle root path
-    if (location === '/' || firstPath === '' || firstPath === 'home') {
-      setActiveNav('home');
-    }
+    const path = location.split('/')[1] || 'home';
     // Handle sub-routes for about section
-    else if (firstPath === 'our-services' || firstPath === 'why-choose-us' || firstPath === 'our-process') {
-      setActiveNav(firstPath);
-    } 
-    // Handle gallery routes (both /gallery and /gallery/:categoryId)
-    else if (firstPath === 'gallery') {
-      setActiveNav('gallery');
-    }
-    // Handle products routes (both /products and /products/:productTypeId)
-    else if (firstPath === 'products') {
-      setActiveNav('products');
-    }
-    // Handle support route
-    else if (firstPath === 'support') {
-      setActiveNav('support');
-    }
-    // Handle all other routes
-    else {
-      setActiveNav(firstPath);
+    if (path === 'our-services' || path === 'why-choose-us' || path === 'our-process') {
+      setActiveNav(path);
+    } else {
+      setActiveNav(path);
     }
     window.scrollTo(0, 0);
   }, [location]);
@@ -105,9 +76,7 @@ function Router() {
       ]
     },
     { id: 'portfolio', label: 'Portfolio', icon: Grid3x3, onClick: () => setLocation('/portfolio') },
-    { id: 'gallery', label: 'Gallery', icon: Images, onClick: () => setLocation('/gallery') },
     { id: 'products', label: 'Products', icon: Package, onClick: () => setLocation('/products') },
-    { id: 'support', label: 'Support', icon: HelpCircle, onClick: () => setLocation('/support') },
     { id: 'social', label: 'Social', icon: Share2, onClick: () => setLocation('/social') },
     { id: 'contact', label: 'Contact', icon: Phone, onClick: () => setLocation('/contact') },
   ];
@@ -123,19 +92,10 @@ function Router() {
                 <Route path="/why-choose-us" component={WhyChooseUs} />
                 <Route path="/our-process" component={OurProcess} />
                 <Route path="/portfolio" component={Portfolio} />
-                <Route path="/products" component={ProductTypes} />
-                <Route path="/products/:productTypeId" component={ProductTypeDetail} />
-                <Route path="/products-old" component={Products} />
+                <Route path="/products" component={Products} />
                 <Route path="/brochures" component={Brochures} />
-                <Route path="/gallery" component={Gallery} />
-                <Route path="/gallery/:categoryId" component={GalleryDetail} />
                 <Route path="/social" component={SocialReviews} />
                 <Route path="/contact" component={Contact} />
-                <Route path="/support" component={Support} />
-                <Route path="/kitchen" component={Kitchen} />
-                <Route path="/bathroom" component={Bathroom} />
-                <Route path="/bedroom" component={Bedroom} />
-                <Route path="/living-room" component={LivingRoom} />
                 <Route path="/api-test" component={APITest} />
                 <Route path="/portfolio-test" component={PortfolioTest} />
         <Route path="/admin/login" component={AdminLogin} />
@@ -216,7 +176,3 @@ function App() {
 }
 
 export default App;
-
-
-
-

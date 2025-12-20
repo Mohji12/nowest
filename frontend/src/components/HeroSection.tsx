@@ -5,15 +5,13 @@ import { ChevronDown } from 'lucide-react';
 interface HeroSectionProps {
   title: string;
   subtitle?: string;
-  image?: string;
-  video?: string;
+  image: string;
   onExplore?: () => void;
 }
 
-export default function HeroSection({ title, subtitle, image, video, onExplore }: HeroSectionProps) {
+export default function HeroSection({ title, subtitle, image, onExplore }: HeroSectionProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [scrollY, setScrollY] = useState(0);
-  const [videoError, setVideoError] = useState(false);
 
   useEffect(() => {
     setTimeout(() => setIsVisible(true), 100);
@@ -28,45 +26,18 @@ export default function HeroSection({ title, subtitle, image, video, onExplore }
 
   return (
     <section className="relative h-screen w-full overflow-hidden">
-      <div className="absolute inset-0 parallax-slow bg-black">
-        {video && !videoError ? (
-          <video
-            src={video}
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover object-center"
-            style={{ 
-              transform: `translateY(${scrollY * 0.5}px)`
-            }}
-            onError={() => {
-              console.error('Hero video failed to load:', video);
-              setVideoError(true);
-            }}
-          />
-        ) : image ? (
-          <img
-            src={image}
-            alt="Hero background"
-            className="w-full h-full object-cover object-center"
-            style={{ 
-              transform: `translateY(${scrollY * 0.5}px)`
-            }}
-            onError={(e) => {
-              console.error('Hero image failed to load:', image);
-              // Fallback to a default image if the main image fails
-              e.currentTarget.src = '/assets/LOGO PNG.png';
-              e.currentTarget.className = 'w-full h-full object-contain object-center';
-              e.currentTarget.onerror = null;
-            }}
-          />
-        ) : null}
+      <div 
+        className="absolute inset-0 bg-cover bg-center parallax-slow"
+        style={{ 
+          backgroundImage: `url(${image})`,
+          transform: `translateY(${scrollY * 0.5}px)`
+        }}
+      >
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40" />
       </div>
 
       {/* Logo at the top center */}
-      <div className="absolute top-1 sm:top-2 left-1/2 -translate-x-1/2 z-20">
+      <div className="absolute top-1 left-1/2 -translate-x-1/2 z-20">
         <div 
           className={`transition-all duration-1000 delay-200 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
@@ -75,15 +46,15 @@ export default function HeroSection({ title, subtitle, image, video, onExplore }
           <img 
             src="/assets/LOGO PNG.png" 
             alt="Nowest Interior Ltd" 
-            className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 2xl:w-72 2xl:h-72 object-contain filter drop-shadow-lg"
+            className="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 xl:w-72 xl:h-72 object-contain filter drop-shadow-lg"
           />
         </div>
       </div>
 
       {/* Centered content */}
-      <div className="relative z-10 h-full flex flex-col items-center justify-center px-3 sm:px-4 md:px-6 text-center">
+      <div className="relative z-10 h-full flex flex-col items-center justify-center px-4 text-center">
         <h1 
-          className={`font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-bold text-white mb-3 sm:mb-4 md:mb-6 px-2 transition-all duration-1000 ${
+          className={`font-serif text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-4 px-2 transition-all duration-1000 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
           data-testid="text-hero-title"
@@ -93,7 +64,7 @@ export default function HeroSection({ title, subtitle, image, video, onExplore }
         
         {subtitle && (
           <p 
-            className={`text-sm sm:text-base md:text-lg lg:text-xl text-white/90 max-w-2xl mb-6 sm:mb-8 md:mb-12 px-4 font-light transition-all duration-1000 delay-300 ${
+            className={`text-base sm:text-lg md:text-xl text-white/90 max-w-2xl mb-8 sm:mb-12 px-4 font-light transition-all duration-1000 delay-300 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
             data-testid="text-hero-subtitle"

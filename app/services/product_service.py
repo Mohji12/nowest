@@ -20,6 +20,20 @@ class ProductService:
     def __init__(self, db: Session):
         self.db = db
     
+    def _convert_product_image(self, product: Product) -> Product:
+        """
+        Convert product image path to full S3 URL if needed.
+        
+        Args:
+            product: Product object
+            
+        Returns:
+            Product with converted image URL
+        """
+        if product.image:
+            product.image = convert_image_to_s3_url(product.image)
+        return product
+    
     def get_all_products(self) -> List[Product]:
         """
         Get all products ordered by creation date.
@@ -28,7 +42,11 @@ class ProductService:
             List of product objects
         """
         try:
-            return self.db.query(Product).order_by(desc(Product.created_at)).all()
+            products = self.db.query(Product).order_by(desc(Product.created_at)).all()
+            # Convert image paths to full S3 URLs
+            for product in products:
+                self._convert_product_image(product)
+            return products
         except Exception as e:
             logger.error(f"Error getting all products: {e}")
             raise HTTPException(
@@ -47,9 +65,13 @@ class ProductService:
             List of product objects
         """
         try:
-            return self.db.query(Product).filter(
+            products = self.db.query(Product).filter(
                 Product.category == category
             ).order_by(desc(Product.created_at)).all()
+            # Convert image paths to full S3 URLs
+            for product in products:
+                self._convert_product_image(product)
+            return products
         except Exception as e:
             logger.error(f"Error getting products by category {category}: {e}")
             raise HTTPException(
@@ -68,7 +90,10 @@ class ProductService:
             Product object or None
         """
         try:
-            return self.db.query(Product).filter(Product.id == product_id).first()
+            product = self.db.query(Product).filter(Product.id == product_id).first()
+            if product:
+                self._convert_product_image(product)
+            return product
         except Exception as e:
             logger.error(f"Error getting product by ID {product_id}: {e}")
             raise HTTPException(
@@ -218,10 +243,14 @@ class ProductService:
         """
         try:
             search_term = f"%{query}%"
-            return self.db.query(Product).filter(
+            products = self.db.query(Product).filter(
                 (Product.name.ilike(search_term)) |
                 (Product.description.ilike(search_term))
             ).order_by(desc(Product.created_at)).all()
+            # Convert image paths to full S3 URLs
+            for product in products:
+                self._convert_product_image(product)
+            return products
         except Exception as e:
             logger.error(f"Error searching products: {e}")
             raise HTTPException(

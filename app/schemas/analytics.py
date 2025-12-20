@@ -1,7 +1,7 @@
 """
 Pydantic schemas for Analytics model validation.
 """
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 from datetime import datetime
 
@@ -13,13 +13,30 @@ class PageViewCreate(BaseModel):
     referrer: Optional[str] = Field(None, max_length=500, description="Referrer URL")
 
 
+def validate_datetime(v):
+    """Convert invalid MySQL datetime values (0000-00-00) to None."""
+    if v is None:
+        return None
+    if isinstance(v, str) and v.startswith('0000-00-00'):
+        return None
+    if isinstance(v, datetime):
+        if v.year == 0 or v.month == 0 or v.day == 0:
+            return None
+    return v
+
+
 class PageViewResponse(BaseModel):
     """Schema for page view response data."""
     id: str = Field(..., description="Page view ID")
     page: str = Field(..., description="Page URL or identifier")
     user_agent: Optional[str] = Field(None, description="User agent string")
     referrer: Optional[str] = Field(None, description="Referrer URL")
-    timestamp: datetime = Field(..., description="View timestamp")
+    timestamp: Optional[datetime] = Field(None, description="View timestamp")
+    
+    @field_validator('timestamp', mode='before')
+    @classmethod
+    def validate_datetime_fields(cls, v):
+        return validate_datetime(v)
     
     class Config:
         from_attributes = True

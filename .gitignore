@@ -51,9 +51,3 @@ env/
 *.local
 .turbo
 
-# Build artifacts and archives
-*.zip
-*.tar.gz
-*.rar
-frontend/nowest_frontend.zip
-
