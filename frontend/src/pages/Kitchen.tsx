@@ -36,28 +36,13 @@ export default function Kitchen() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Use known working kitchen images from S3 (primary source)
+  // Get kitchen images from portfolio API (same source as Portfolio page)
   const kitchenImages = useMemo(() => {
-    // Primary: Known working kitchen images from S3
-    const knownWorkingImages = [
-      'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Portrait_Kitchen_Perfect_Fit_NG_Roller_Bubbles_White.jpg.webp',
-      'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape-size-Birdsong-Colour-Crush_Kit.jpg.webp',
-      'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape-size-Nordic_Duckegg_Kit.jpg.webp',
-      'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/PFNG-Image.jpg.webp',
-      'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape-PF3.jpg.webp',
-      'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape_Perfect_Fit_Next_Generation_Cellular_Halo_Marine_Liv-1536x1097.jpg.webp',
-      'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Vert-Landscape-size-Ex-Lite-Blue_Kit.jpg.webp',
-      'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Portrait-Vertical_Collina_Diamond_Dust-700x500-1.jpg.webp',
-      'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Portrait-Vertical_Bamboo_pacific-700x500-1.jpg.webp',
-      'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape-Cell_Celeste_LF_Anthracite-700x500-1.jpg.webp',
-      'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape-Cell_Celeste_LF_Red_Rust-700x500-1.jpg.webp',
-      'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape-Cell_Halo_Sea_Mist-700x500-1.jpg.webp',
-    ];
-
-    // Optionally supplement with portfolio images if available
-    if (portfolioData && Array.isArray(portfolioData)) {
-      const kitchenKeywords = ['kitchen', 'kit', 'perfect fit', 'roller', 'cellular', 'vertical', 'venetian'];
-      const portfolioImages = (portfolioData as any[])
+    // If portfolio data is available, use actual working images from portfolio
+    if (portfolioData && Array.isArray(portfolioData) && portfolioData.length > 0) {
+      // First, try to filter for kitchen-related images
+      const kitchenKeywords = ['kitchen', 'kit'];
+      const kitchenFiltered = (portfolioData as any[])
         .filter((item: any) => {
           const title = (item.title || '').toLowerCase();
           const category = (item.category || '').toLowerCase();
@@ -67,22 +52,51 @@ export default function Kitchen() {
         })
         .map((item: any) => {
           const imageField = item.image || item.image_url || item.imageUrl || item.photo || item.photo_url;
-          const url = getImageUrl(imageField || '');
+          if (!imageField) return null;
+          
+          // Use same logic as Portfolio page
+          let url = '';
+          if (imageField.startsWith('http://') || imageField.startsWith('https://')) {
+            url = imageField;
+          } else if (imageField.startsWith('/')) {
+            const cleanPath = imageField.substring(1);
+            url = `https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/attached_assets/${cleanPath}`;
+          } else {
+            url = `https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/attached_assets/${imageField}`;
+          }
           return url;
         })
-        .filter((url: string) => url && url !== '/assets/LOGO PNG.png' && url.startsWith('http'));
+        .filter((url): url is string => url !== null && url !== '' && url.startsWith('http'));
 
-      // Combine known working images with portfolio images, avoiding duplicates
-      const allImages = [...knownWorkingImages];
-      portfolioImages.forEach((url) => {
-        if (!allImages.includes(url)) {
-          allImages.push(url);
-        }
-      });
-      return allImages.slice(0, 15); // Return up to 15 images
+      // If we have at least 9 kitchen-specific images, use them
+      if (kitchenFiltered.length >= 9) {
+        return kitchenFiltered.slice(0, 15);
+      }
+      
+      // Otherwise, use all portfolio images (same as Portfolio page)
+      const allPortfolioImages = (portfolioData as any[])
+        .map((item: any) => {
+          const imageField = item.image || item.image_url || item.imageUrl || item.photo || item.photo_url;
+          if (!imageField) return null;
+          
+          let url = '';
+          if (imageField.startsWith('http://') || imageField.startsWith('https://')) {
+            url = imageField;
+          } else if (imageField.startsWith('/')) {
+            const cleanPath = imageField.substring(1);
+            url = `https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/attached_assets/${cleanPath}`;
+          } else {
+            url = `https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/attached_assets/${imageField}`;
+          }
+          return url;
+        })
+        .filter((url): url is string => url !== null && url !== '' && url.startsWith('http'));
+      
+      return allPortfolioImages.slice(0, 15);
     }
 
-    return knownWorkingImages;
+    // Return empty array if no portfolio data - will show loading state
+    return [];
   }, [portfolioData]);
 
   const openLightbox = (index: number) => {
@@ -190,8 +204,14 @@ export default function Kitchen() {
       {/* Image Gallery Section */}
       <section className="py-6 sm:py-8 md:py-12 px-4 sm:px-6 md:px-8 pb-32 sm:pb-40 md:pb-48">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
-            {kitchenImages.map((image, index) => (
+          {kitchenImages.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading images...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
+              {kitchenImages.map((image, index) => (
               <div
                 key={index}
                 onClick={() => openLightbox(index)}
@@ -203,9 +223,9 @@ export default function Kitchen() {
                     alt={`Kitchen inspiration ${index + 1}`}
                     className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
                     onError={(e) => {
-                      e.currentTarget.src = '/assets/LOGO PNG.png';
-                      e.currentTarget.className = 'w-full h-full object-contain p-4 transition-all duration-700 group-hover:scale-110';
-                      e.currentTarget.onerror = null;
+                      // Hide broken images instead of showing logo
+                      e.currentTarget.style.display = 'none';
+                      console.error(`Failed to load kitchen image ${index + 1}:`, image);
                     }}
                   />
                   
@@ -224,8 +244,9 @@ export default function Kitchen() {
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -280,9 +301,9 @@ export default function Kitchen() {
               alt={`Kitchen inspiration ${selectedImageIndex + 1}`}
               className="max-w-full max-h-full object-contain"
               onError={(e) => {
-                e.currentTarget.src = '/assets/LOGO PNG.png';
-                e.currentTarget.className = 'max-w-full max-h-full object-contain p-4 sm:p-8';
-                e.currentTarget.onerror = null;
+                // Hide broken images in lightbox
+                e.currentTarget.style.display = 'none';
+                console.error(`Failed to load kitchen image in lightbox:`, kitchenImages[selectedImageIndex]);
               }}
             />
           </div>
