@@ -1,3 +1,5 @@
+import React from 'react';
+
 interface ProjectCardProps {
   id: string;
   title: string;
@@ -10,6 +12,53 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ id, title, category, image, description, location, year, onClick }: ProjectCardProps) {
+  // Handle image loading errors with S3 bucket name fallback
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.currentTarget;
+    const currentSrc = target.src;
+    console.error(`[ProjectCard] Image failed to load for "${title}":`, currentSrc);
+    
+    // Try alternative bucket name if it's an S3 URL
+    if (currentSrc.includes('jgi-menteetrackers')) {
+      const altUrl = currentSrc.replace('jgi-menteetrackers', 'jgi-menteetracker');
+      console.log(`[ProjectCard] Trying alternative bucket URL:`, altUrl);
+      target.src = altUrl;
+      target.onerror = null;
+      return;
+    }
+    
+    if (currentSrc.includes('jgi-menteetracker') && !currentSrc.includes('LOGO PNG')) {
+      const altUrl = currentSrc.replace('jgi-menteetracker', 'jgi-menteetrackers');
+      console.log(`[ProjectCard] Trying alternative bucket URL:`, altUrl);
+      target.src = altUrl;
+      target.onerror = null;
+      return;
+    }
+    
+    // Try to use a fallback image
+    const fallbackImage = '/assets/LOGO PNG.png';
+    
+    // Only set fallback if we haven't already tried it
+    if (target.src !== fallbackImage && !target.src.includes('LOGO PNG')) {
+      console.log(`[ProjectCard] Using fallback image for "${title}"`);
+      target.src = fallbackImage;
+      target.className = 'w-full h-full object-contain p-4 transition-all duration-700 group-hover:scale-110';
+      target.onerror = null; // Prevent infinite loop
+    } else {
+      // If fallback also fails, hide the image
+      target.style.display = 'none';
+    }
+  };
+
+  // Log image URL for debugging
+  React.useEffect(() => {
+    if (image) {
+      console.log(`[ProjectCard] Loading image for "${title}":`, image);
+    } else {
+      console.warn(`[ProjectCard] No image provided for "${title}"`);
+    }
+  }, [image, title]);
+
   return (
     <div
       onClick={onClick}
@@ -17,13 +66,27 @@ export default function ProjectCard({ id, title, category, image, description, l
       data-testid={`card-project-${id}`}
     >
       {/* Image Section */}
-      <div className="aspect-[4/3] overflow-hidden relative">
-        <img
-          src={image}
-          alt={title}
-          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
-          data-testid={`img-project-${id}`}
-        />
+      <div className="aspect-[4/3] overflow-hidden relative bg-gray-100">
+        {image ? (
+          <img
+            src={image}
+            alt={title}
+            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+            data-testid={`img-project-${id}`}
+            onError={handleImageError}
+            onLoad={() => {
+              console.log(`[ProjectCard] Image loaded successfully for "${title}":`, image);
+            }}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gray-100">
+            <img
+              src="/assets/LOGO PNG.png"
+              alt={title}
+              className="w-24 h-24 object-contain opacity-50"
+            />
+          </div>
+        )}
         
         {/* Category Badge */}
         {category && (

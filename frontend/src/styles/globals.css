@@ -120,6 +120,32 @@
   background: #a8a8a8;
 }
 
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+  overflow: -moz-scrollbars-none;  /* Old Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+  width: 0;  /* Remove scrollbar space */
+  height: 0;  /* Remove scrollbar space */
+  background: transparent;  /* Optional: just make scrollbar invisible */
+}
+
+/* Additional specificity for nested elements */
+.scrollbar-hide * {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide *::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
@@ -274,6 +300,63 @@ html {
   }
 }
 
+/* Extra small devices (phones, less than 400px) */
+@media (max-width: 400px) {
+  .container {
+    @apply px-3;
+  }
+  
+  /* Smaller text on very small screens */
+  h1, h2, h3 {
+    font-size: 1.5rem;
+  }
+  
+  /* Tighter spacing */
+  .section-padding {
+    @apply py-8 px-3;
+  }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Tablet-specific optimizations */
+  .tablet-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Better spacing for tablets */
+  .section-padding {
+    @apply py-12 px-6;
+  }
+}
+
+/* Large devices (desktops, 1024px and up) */
+@media (min-width: 1024px) {
+  /* Desktop optimizations */
+  .desktop-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  /* Better spacing for desktops */
+  .section-padding {
+    @apply py-16 px-8;
+  }
+}
+
+/* Extra large devices (large desktops, 1280px and up) */
+@media (min-width: 1280px) {
+  .xl-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* 2XL devices (extra large desktops, 1536px and up) */
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1536px;
+  }
+}
+
 /* Device-specific optimizations */
 /* iPhone and small Android devices */
 @media (max-width: 480px) {
@@ -387,6 +470,16 @@ html {
 
 .animate-fade-slide-up {
   animation: fade-slide-up 0.8s ease-out;
+}
+
+/* Continuous scroll animation for mobile navigation */
+@keyframes scrollRightToLeft {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 @keyframes fade-slide-up {

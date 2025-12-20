@@ -29,7 +29,11 @@ export function usePageViewTracking() {
         }
       } catch (error) {
         // Silently fail - don't disrupt user experience
-        console.warn('Page view tracking failed:', error);
+        // Only log in development mode
+        const isDev = (import.meta as any).env?.DEV || (import.meta as any).env?.MODE === 'development';
+        if (isDev) {
+          console.warn('Page view tracking failed:', error);
+        }
       }
     };
 

@@ -62,27 +62,52 @@ export default function Contact() {
     createLeadMutation.mutate(data);
   };
 
+  // Background image path - using portfolio image from S3
+  const contactImage = 'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape_Petal_White_Liv-1024x731.jpg.webp';
+
   return (
-    <div className="py-16 sm:py-20 md:py-24 px-4 sm:px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12 sm:mb-16">
-          <div className="mb-6 sm:mb-8">
+    <div>
+      {/* Header section with background image - Full width */}
+      <div className="relative text-center mb-8 sm:mb-12 md:mb-16 overflow-hidden w-full" style={{ minHeight: '350px' }}>
+        {/* Background image */}
+        <img
+          src={contactImage}
+          alt="Contact background"
+          className="absolute inset-0 w-full h-full object-cover z-0"
+          style={{ minHeight: '350px', width: '100%' }}
+          onError={(e) => {
+            console.error('Contact image failed to load:', contactImage);
+            e.currentTarget.src = '/assets/LOGO PNG.png';
+            e.currentTarget.className = 'absolute inset-0 w-full h-full object-contain z-0 p-8';
+          }}
+        />
+        
+        {/* Overlay for better text readability */}
+        <div className="absolute inset-0 bg-black bg-opacity-30 z-10"></div>
+        
+        {/* Content overlay - Centered with max-width */}
+        <div className="relative z-20 py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-6 max-w-6xl mx-auto">
+          <div className="mb-4 sm:mb-6 md:mb-8">
             <img 
               src="/assets/LOGO PNG.png" 
               alt="Nowest Interior Ltd" 
-              className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 mx-auto object-contain"
+              className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 xl:w-56 xl:h-56 mx-auto object-contain"
             />
           </div>
-          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 px-2" data-testid="text-contact-title">
+          <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 sm:mb-4 md:mb-6 px-2 text-white drop-shadow-lg" data-testid="text-contact-title">
             Get in Touch
           </h1>
-          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
+          <p className="text-sm sm:text-base md:text-lg text-white max-w-2xl mx-auto px-4 drop-shadow-md">
             Ready to elevate your space with bespoke window treatments? 
             We'd love to hear about your project.
           </p>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-12">
+      {/* Contact Form Section */}
+      <div className="py-8 sm:py-12 md:py-16 lg:py-20 xl:py-24 px-4 sm:px-6 md:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12">
           <div>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -234,6 +259,7 @@ export default function Contact() {
               </p>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

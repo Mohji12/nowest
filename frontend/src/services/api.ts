@@ -3,21 +3,41 @@ import { API_ENDPOINTS } from '@/lib/config';
 
 // Authentication removed - direct access enabled
 
-// Generic API request function
+// Retry configuration
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second base delay
+const REQUEST_TIMEOUT = 30000; // 30 seconds
+
+// Helper function to delay execution
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Helper function to create timeout promise
+const createTimeoutPromise = (timeoutMs: number) => {
+  return new Promise((_, reject) => {
+    setTimeout(() => reject(new Error(`Request timeout after ${timeoutMs}ms`)), timeoutMs);
+  });
+};
+
+// Generic API request function with retry logic
 async function apiRequest<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  retryCount = 0
 ): Promise<T> {
   const url = `${BASE_URL}${endpoint}`;
   
-  // Debug logging
-  console.log('API Request:', {
-    url,
-    endpoint,
-    baseUrl: BASE_URL,
-    mode: (import.meta as any).env?.MODE,
-    options: { ...options }
-  });
+  // Debug logging (only on first attempt)
+  if (retryCount === 0) {
+    console.log('API Request:', {
+      url,
+      endpoint,
+      baseUrl: BASE_URL,
+      mode: (import.meta as any).env?.MODE,
+      options: { ...options }
+    });
+  } else {
+    console.log(`API Request Retry ${retryCount}/${MAX_RETRIES}:`, url);
+  }
   
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -32,17 +52,44 @@ async function apiRequest<T>(
   };
 
   try {
-    const response = await fetch(url, { ...defaultOptions, ...options });
-
-    console.log('API Response:', {
-      url,
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok,
-      headers: Object.fromEntries(response.headers.entries())
+    // Create abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+    
+    // Race between fetch and timeout
+    const fetchPromise = fetch(url, { 
+      ...defaultOptions, 
+      ...options,
+      signal: controller.signal 
     });
+    
+    const response = await Promise.race([
+      fetchPromise,
+      createTimeoutPromise(REQUEST_TIMEOUT)
+    ]) as Response;
+    
+    clearTimeout(timeoutId);
+
+    // Log response (only on first attempt or errors)
+    if (retryCount === 0 || !response.ok) {
+      console.log('API Response:', {
+        url,
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+    }
 
     if (!response.ok) {
+      // Retry on 500 errors (server errors) or 503 (service unavailable)
+      if ((response.status === 500 || response.status === 503) && retryCount < MAX_RETRIES) {
+        const delayMs = RETRY_DELAY * Math.pow(2, retryCount); // Exponential backoff
+        console.warn(`Server error ${response.status}, retrying in ${delayMs}ms...`);
+        await delay(delayMs);
+        return apiRequest<T>(endpoint, options, retryCount + 1);
+      }
+      
       // Create a more detailed error object
       const error = new Error(`API request failed: ${response.status} ${response.statusText}`) as any;
       error.status = response.status;
@@ -52,18 +99,46 @@ async function apiRequest<T>(
       // Try to get error details from response
       try {
         const errorData = await response.json();
-        error.detail = errorData.detail || errorData.message;
+        error.detail = errorData.detail || errorData.message || errorData.error;
         console.error('API Error Details:', errorData);
+        
+        // Provide user-friendly error messages
+        if (response.status === 500) {
+          error.userMessage = 'Server error: The backend service is experiencing issues. Please try again later.';
+        } else if (response.status === 503) {
+          error.userMessage = 'Service unavailable: The service is temporarily down. Please try again later.';
+        } else if (response.status === 404) {
+          error.userMessage = 'Resource not found: The requested data could not be found.';
+        } else {
+          error.userMessage = error.detail || 'An error occurred while fetching data.';
+        }
       } catch {
         // If we can't parse JSON, use the status text
         error.detail = response.statusText;
+        if (response.status === 500) {
+          error.userMessage = 'Server error: The backend service is experiencing issues. This might be due to database connection problems.';
+        } else {
+          error.userMessage = response.statusText || 'An error occurred while fetching data.';
+        }
       }
       
       throw error;
     }
 
     return response.json();
-  } catch (error) {
+  } catch (error: any) {
+    // Retry on network errors or timeouts
+    if (
+      (error.name === 'TypeError' || error.name === 'AbortError' || error.message?.includes('timeout')) &&
+      retryCount < MAX_RETRIES
+    ) {
+      const delayMs = RETRY_DELAY * Math.pow(2, retryCount);
+      console.warn(`Network error, retrying in ${delayMs}ms...`, error.message);
+      await delay(delayMs);
+      return apiRequest<T>(endpoint, options, retryCount + 1);
+    }
+    
+    // Log error details
     console.error('API request error:', error);
     console.error('Request URL:', url);
     console.error('Request options:', { ...defaultOptions, ...options });
@@ -72,6 +147,18 @@ async function apiRequest<T>(
       baseUrl: BASE_URL,
       isDev: (import.meta as any).env?.DEV
     });
+    
+    // Enhance error with user-friendly message if not already set
+    if (!error.userMessage) {
+      if (error.name === 'AbortError' || error.message?.includes('timeout')) {
+        error.userMessage = 'Request timeout: The server took too long to respond. Please check your connection and try again.';
+      } else if (error.name === 'TypeError' && error.message?.includes('fetch')) {
+        error.userMessage = 'Network error: Unable to connect to the server. Please check your internet connection.';
+      } else {
+        error.userMessage = 'An unexpected error occurred. Please try again later.';
+      }
+    }
+    
     throw error;
   }
 }
@@ -85,9 +172,9 @@ export async function trackPageView(data: {
   try {
     const url = `${BASE_URL}${API_ENDPOINTS.PAGEVIEW}`;
     
-    // Add timeout to prevent hanging requests
+    // Add timeout to prevent hanging requests - reduced to 3 seconds
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
     
     const response = await fetch(url, {
       method: 'POST',
@@ -109,12 +196,16 @@ export async function trackPageView(data: {
 
     return response.json();
   } catch (error) {
-    // Silently fail for page view tracking - don't disrupt user experience
-    if (error instanceof Error && error.name === 'AbortError') {
-      console.warn('Page view tracking timed out');
-    } else {
-      console.warn('Page view tracking failed:', error);
+    // Silently fail for page view tracking - only log in development
+    const isDev = (import.meta as any).env?.DEV || (import.meta as any).env?.MODE === 'development';
+    if (isDev) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.warn('Page view tracking timed out (backend may not be running)');
+      } else if (error instanceof Error && error.message?.includes('fetch')) {
+        console.warn('Page view tracking failed: Backend server may not be running');
+      }
     }
+    // In production, completely silent - don't log anything
     return null;
   }
 }

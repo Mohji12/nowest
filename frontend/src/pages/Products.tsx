@@ -8,11 +8,20 @@ import woodVenetianImg from '@assets/stock_images/wooden_venetian_blin_7e7829a6.
 import romanBlindsImg from '@assets/stock_images/roman_blinds_luxury__00686ca9.jpg';
 import verticalBlindsImg from '@assets/stock_images/vertical_blinds_pati_2902750d.jpg';
 import curtainsImg from '@assets/stock_images/luxury_made_to_measu_6dae048d.jpg';
+import curtainsImg2 from '@assets/stock_images/luxury_made_to_measu_df4fc3f5.jpg';
+import curtainsImg3 from '@assets/stock_images/made_to_measure_luxu_14f11c74.jpg';
 import blackoutImage from '@assets/generated_images/Blackout_curtains_bedroom_luxury_675bdda2.png';
 import sheerImage from '@assets/generated_images/Luxury_sheer_curtains_hero_53aa2ee0.png';
+import velvetCurtainsImg from '@assets/stock_images/velvet_curtains_rich_182d7870.jpg';
+import silkCurtainsImg from '@assets/stock_images/silk_curtains_luxury_7a06336f.jpg';
+import layeredCurtainsImg from '@assets/stock_images/layered_curtains_she_0428ff9d.jpg';
 import shuttersImg from '@assets/stock_images/plantation_shutters__c750720c.jpg';
 import commercialCurtainsImg from '@assets/stock_images/commercial_bespoke_c_80ae7c98.jpg';
 import motorizedBlindsImg from '@assets/stock_images/motorized_automated__4b820a60.jpg';
+
+// S3 image URLs for products
+const MOTORIZED_BLINDS_S3_URL = 'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/attached_assets/stock_images/motorized_automated__978f737d.jpg';
+const PLEATED_PANEL_BLINDS_S3_URL = 'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/attached_assets/stock_images/panel_blinds_sliding_0c1c0c07.jpg';
 
 export default function Products() {
   const [selectedCategory, setSelectedCategory] = useState('blinds');
@@ -39,19 +48,24 @@ export default function Products() {
   ];
 
   // Process products data and group by category
-  const products = (productsData as any[])?.reduce((acc: any, item: any) => {
+  const products = (productsData as any[])?.reduce((acc: any, item: any, index: number) => {
     const category = item.category || 'blinds';
     
     if (!acc[category]) {
       acc[category] = [];
     }
     
-    // Convert relative image paths to absolute S3 URLs
-    const getImageUrl = (imagePath: string) => {
-      if (!imagePath) return getProductImage(item.name || '', category);
+    // Convert relative image paths to absolute S3 URLs with better error handling
+    const getImageUrl = (imagePath: string, productIndex?: number) => {
+      if (!imagePath || imagePath.trim() === '') {
+        console.log(`[Products] No image path for product: ${item.name}, using fallback`);
+        // Pass index for curtain products to get different images
+        return getProductImage(item.name || '', category, productIndex);
+      }
       
-      // If it's already a full URL (S3 or any other), return as is
-      if (imagePath.startsWith('http')) {
+      // If it's already a full URL (S3 or any other), return as is - this is the database URL
+      if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        console.log(`[Products] ✅ Using database URL for ${item.name}: ${imagePath}`);
         return imagePath;
       }
       
@@ -60,19 +74,34 @@ export default function Products() {
         // Remove leading slash and construct S3 URL
         const cleanPath = imagePath.substring(1);
         const s3Url = `https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/attached_assets/${cleanPath}`;
+        console.log(`[Products] Converted relative path to S3 URL for ${item.name}: ${imagePath} -> ${s3Url}`);
         return s3Url;
       }
       
       // If it's a relative path without leading slash, add it
       const s3Url = `https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/attached_assets/${imagePath}`;
+      console.log(`[Products] Converted path to S3 URL for ${item.name}: ${imagePath} -> ${s3Url}`);
       return s3Url;
     };
 
     // Check multiple possible image field names
     const imageField = item.image_url || item.image || item.imageUrl || item.photo || item.photo_url;
     
+    // Log for debugging (only if image field exists)
+    if (imageField) {
+      console.log(`[Products] Product: ${item.name}, Image field from database: ${imageField}`);
+      if (imageField.startsWith('http')) {
+        console.log(`[Products] ✅ Database has full URL - will use it directly`);
+      }
+    } else {
+      console.log(`[Products] Product: ${item.name}, No image field found, will use fallback`);
+    }
+    
     // Map product data with database images
-    const productImage = getImageUrl(imageField);
+    // This will use the database URL if it exists, otherwise use fallback
+    // Pass the index within the category for curtain products to get different images
+    const categoryIndex = acc[category] ? acc[category].length : 0;
+    const productImage = getImageUrl(imageField || '', categoryIndex);
     
     acc[category].push({
       id: item.id?.toString() || Math.random().toString(),
@@ -128,7 +157,7 @@ export default function Products() {
         id: '4', 
         name: 'Made-to-measure', 
         description: 'Bespoke curtains tailored to your exact requirements. Perfect fit and professional finish guaranteed.', 
-        image: curtainsImg,
+        image: curtainsImg3,
         features: ['Perfect fit', 'Custom sizing', 'Professional finish', 'Premium materials']
       },
     ],
@@ -137,7 +166,7 @@ export default function Products() {
         id: '5', 
         name: 'Commercial Motorised Blinds', 
         description: 'Automated blinds for commercial buildings offering centralized control and energy management. Perfect for smart buildings and modern offices.', 
-        image: motorizedBlindsImg,
+        image: MOTORIZED_BLINDS_S3_URL,
         features: ['Centralized control', 'Energy management', 'Smart building ready', 'Professional automation']
       },
       { 
@@ -188,20 +217,43 @@ export default function Products() {
 
 
   // Helper function to get product image based on name and category
-  function getProductImage(name: string, category: string): string {
-    const nameKey = name.toLowerCase();
-    const categoryKey = category.toLowerCase();
+  function getProductImage(name: string, category: string, index: number = 0): string {
+    if (!name && !category) {
+      return rollerBlindsImg; // Default fallback
+    }
     
-    if (nameKey.includes('roller')) return rollerBlindsImg;
-    if (nameKey.includes('venetian')) return woodVenetianImg;
+    const nameKey = (name || '').toLowerCase();
+    const categoryKey = (category || '').toLowerCase();
+    
+    // Check name first
+    if (nameKey.includes('roller') || nameKey.includes('roll')) return rollerBlindsImg;
+    if (nameKey.includes('venetian') || nameKey.includes('venet')) return woodVenetianImg;
     if (nameKey.includes('roman')) return romanBlindsImg;
-    if (nameKey.includes('vertical')) return verticalBlindsImg;
-    if (nameKey.includes('curtain') || nameKey.includes('drape')) return curtainsImg;
+    if (nameKey.includes('vertical') || nameKey.includes('vert')) return verticalBlindsImg;
+    
+    // Different curtain types get different images
+    if (nameKey.includes('velvet')) return velvetCurtainsImg;
+    if (nameKey.includes('silk')) return silkCurtainsImg;
+    if (nameKey.includes('layered') || nameKey.includes('dual')) return layeredCurtainsImg;
     if (nameKey.includes('sheer') || nameKey.includes('voile')) return sheerImage;
-    if (nameKey.includes('blackout')) return blackoutImage;
+    if (nameKey.includes('blackout') || nameKey.includes('black-out')) return blackoutImage;
+    if (nameKey.includes('made-to-measure') || nameKey.includes('bespoke') || nameKey.includes('custom')) return curtainsImg3;
+    if (nameKey.includes('ready-made') || nameKey.includes('ready made') || nameKey.includes('standard')) return curtainsImg;
+    
+    // For generic curtain products, cycle through different images based on index
+    if (nameKey.includes('curtain') || nameKey.includes('drape')) {
+      const curtainImages = [curtainsImg, curtainsImg2, curtainsImg3, velvetCurtainsImg, silkCurtainsImg, layeredCurtainsImg];
+      return curtainImages[index % curtainImages.length];
+    }
     if (nameKey.includes('shutter')) return shuttersImg;
+    if (nameKey.includes('motorized') || nameKey.includes('motorised') || nameKey.includes('automated') || nameKey.includes('motor')) return MOTORIZED_BLINDS_S3_URL;
+    if (nameKey.includes('pleated') || nameKey.includes('panel') || nameKey.includes('cellular') || nameKey.includes('honeycomb')) return PLEATED_PANEL_BLINDS_S3_URL;
+    
+    // Check category
     if (categoryKey.includes('commercial')) return commercialCurtainsImg;
-    if (nameKey.includes('motorized') || nameKey.includes('automated')) return motorizedBlindsImg;
+    if (categoryKey.includes('curtain')) return curtainsImg;
+    if (categoryKey.includes('blind')) return rollerBlindsImg;
+    if (categoryKey.includes('shutter')) return shuttersImg;
     
     return rollerBlindsImg; // Default fallback
   }
@@ -462,13 +514,57 @@ export default function Products() {
                 {(finalProducts[selectedCategory] || []).map((product: any) => (
                   <div key={product.id} className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                     {/* Image Section */}
-                    <div className="aspect-[4/3] overflow-hidden rounded-t-lg">
+                    <div className="aspect-[4/3] overflow-hidden rounded-t-lg bg-gray-100 relative">
                       <img
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover transition-all duration-700 hover:scale-105"
                         onError={(e) => {
-                          e.currentTarget.style.display = 'none';
+                          const target = e.currentTarget;
+                          const currentSrc = target.src;
+                          
+                          console.error(`[Products] Image failed to load for "${product.name}":`, currentSrc);
+                          
+                          // If it's the S3 URL with 's', try without 's'
+                          if (currentSrc.includes('jgi-menteetrackers')) {
+                            const altUrl = currentSrc.replace('jgi-menteetrackers', 'jgi-menteetracker');
+                            console.log(`[Products] Trying alternative bucket URL:`, altUrl);
+                            target.src = altUrl;
+                            target.onerror = null;
+                            return;
+                          }
+                          
+                          // If it's the S3 URL without 's', try with 's' (for motorized or panel/pleated)
+                          if (currentSrc.includes('jgi-menteetracker') && (currentSrc.includes('motorized_automated') || currentSrc.includes('panel_blinds'))) {
+                            const altUrl = currentSrc.replace('jgi-menteetracker', 'jgi-menteetrackers');
+                            console.log(`[Products] Trying alternative bucket URL:`, altUrl);
+                            target.src = altUrl;
+                            target.onerror = null;
+                            return;
+                          }
+                          
+                          // Try fallback image based on product name/category
+                          const fallbackImage = getProductImage(product.name || '', product.category || '');
+                          
+                          // Only set fallback if we haven't already tried it
+                          if (target.src !== fallbackImage && !target.src.includes('LOGO PNG')) {
+                            console.log(`[Products] Trying fallback image for "${product.name}":`, fallbackImage);
+                            target.src = fallbackImage;
+                            target.className = 'w-full h-full object-cover transition-all duration-700 hover:scale-105';
+                            target.onerror = null; // Reset error handler to prevent infinite loop
+                          } else {
+                            // If fallback also fails, show logo
+                            console.log(`[Products] All fallbacks failed for "${product.name}", showing logo`);
+                            target.src = '/assets/LOGO PNG.png';
+                            target.className = 'w-full h-full object-contain p-4 transition-all duration-700 hover:scale-105';
+                            target.onerror = null; // Prevent infinite loop
+                          }
+                        }}
+                        onLoad={() => {
+                          console.log(`[Products] ✅ Image loaded successfully for "${product.name}":`, product.image);
+                        }}
+                        onLoadStart={() => {
+                          console.log(`[Products] 🔄 Attempting to load image for "${product.name}":`, product.image);
                         }}
                       />
                     </div>
@@ -514,17 +610,61 @@ export default function Products() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {(finalProducts[selectedCategory] || []).map((product: any) => (
               <div key={product.id} className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                {/* Image Section */}
-                <div className="aspect-[4/3] overflow-hidden rounded-t-lg">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover transition-all duration-700 hover:scale-105"
+                    {/* Image Section */}
+                    <div className="aspect-[4/3] overflow-hidden rounded-t-lg bg-gray-100 relative">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover transition-all duration-700 hover:scale-105"
                         onError={(e) => {
-                          e.currentTarget.style.display = 'none';
+                          const target = e.currentTarget;
+                          const currentSrc = target.src;
+                          
+                          console.error(`[Products] Image failed to load for "${product.name}":`, currentSrc);
+                          
+                          // If it's the S3 URL with 's', try without 's'
+                          if (currentSrc.includes('jgi-menteetrackers')) {
+                            const altUrl = currentSrc.replace('jgi-menteetrackers', 'jgi-menteetracker');
+                            console.log(`[Products] Trying alternative bucket URL:`, altUrl);
+                            target.src = altUrl;
+                            target.onerror = null;
+                            return;
+                          }
+                          
+                          // If it's the S3 URL without 's', try with 's' (for motorized or panel/pleated)
+                          if (currentSrc.includes('jgi-menteetracker') && (currentSrc.includes('motorized_automated') || currentSrc.includes('panel_blinds'))) {
+                            const altUrl = currentSrc.replace('jgi-menteetracker', 'jgi-menteetrackers');
+                            console.log(`[Products] Trying alternative bucket URL:`, altUrl);
+                            target.src = altUrl;
+                            target.onerror = null;
+                            return;
+                          }
+                          
+                          // Try fallback image based on product name/category
+                          const fallbackImage = getProductImage(product.name || '', product.category || '');
+                          
+                          // Only set fallback if we haven't already tried it
+                          if (target.src !== fallbackImage && !target.src.includes('LOGO PNG')) {
+                            console.log(`[Products] Trying fallback image for "${product.name}":`, fallbackImage);
+                            target.src = fallbackImage;
+                            target.className = 'w-full h-full object-cover transition-all duration-700 hover:scale-105';
+                            target.onerror = null; // Reset error handler to prevent infinite loop
+                          } else {
+                            // If fallback also fails, show logo
+                            console.log(`[Products] All fallbacks failed for "${product.name}", showing logo`);
+                            target.src = '/assets/LOGO PNG.png';
+                            target.className = 'w-full h-full object-contain p-4 transition-all duration-700 hover:scale-105';
+                            target.onerror = null; // Prevent infinite loop
+                          }
                         }}
-                  />
-                </div>
+                        onLoad={() => {
+                          console.log(`[Products] ✅ Image loaded successfully for "${product.name}":`, product.image);
+                        }}
+                        onLoadStart={() => {
+                          console.log(`[Products] 🔄 Attempting to load image for "${product.name}":`, product.image);
+                        }}
+                      />
+                    </div>
                 
                 {/* Content Section - Mobile Optimized */}
                 <div className="p-4 sm:p-6">

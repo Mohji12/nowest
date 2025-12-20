@@ -1,12 +1,7 @@
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
 import { getBrochures } from '@/services/api';
-import { Download, FileText, ExternalLink } from 'lucide-react';
 
 export default function Brochures() {
-  const [selectedCategory, setSelectedCategory] = useState('brochures');
-
   // Fetch real brochures data from API
   const { data: brochuresData, isLoading, error } = useQuery({
     queryKey: ['brochures'],
@@ -14,75 +9,95 @@ export default function Brochures() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const categories = [
-    { id: 'blinds', label: 'Blinds' },
-    { id: 'curtains', label: 'Curtains' },
-    { id: 'commercial', label: 'Commercial' },
-    { id: 'brochures', label: 'Brochures' },
-  ];
-
   // Process brochures data
-  const brochures = brochuresData?.map((item: any) => ({
+  const brochures = (brochuresData && Array.isArray(brochuresData) ? brochuresData : []).map((item: any) => ({
     id: item.id?.toString() || Math.random().toString(),
     title: item.title || 'Untitled Brochure',
     subtitle: item.subtitle || item.category || 'Product Brochure',
     description: item.description || 'Download our brochure for more information',
     category: item.category || 'General',
     fileSize: item.file_size || 'Unknown',
-    fileUrl: item.file_url || null,
+    fileUrl: item.file_url || item.pdf_path || null,
     downloadCount: item.download_count || 0,
     status: item.status || 'active',
     createdAt: item.created_at ? new Date(item.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
     updatedAt: item.updated_at ? new Date(item.updated_at).toISOString().split('T')[0] : null,
-  })) || [
-    // Fallback data if API fails - matching the image design
+  }));
+
+  // Use fallback data if no brochures from API
+  const finalBrochures = brochures.length > 0 ? brochures : [
+    // Fallback data matching the design - 4 brochures like in the image
     {
       id: '1',
-      title: 'Allusion2024',
-      subtitle: 'Allusion Curtains',
-      description: 'Browse our collection of product brochures featuring our complete range of blinds, curtains, and window treatments. View them directly in your browser or download for later reference.',
-      category: 'Curtains',
-      fileSize: '2.5 MB',
-      fileUrl: '/sample-brochure.pdf',
-      downloadCount: 156,
-      status: 'active',
-      createdAt: '2024-01-15',
-      updatedAt: null,
+      title: 'Uk_panel_brochures',
+      subtitle: 'Panel Blinds Collection',
+      description: 'Browse our collection of product brochures featuring our complete range of blinds, curtains, and window treatments.',
+      category: 'Collection',
+      fileUrl: 'https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/brochures/Collection2024.pdf',
+      image: '/assets/brochures/NowestImages/collection/Landscape_Haven-Oatmeal_BO_Kids-1536x1097.jpg.webp'
     },
     {
       id: '2',
-      title: 'Newest Interior Collection 2024',
-      subtitle: 'Complete Range',
-      description: 'Inspiration & Stylish Solutions for Your Windows. Discover our complete range of blinds and curtains including rollers, verticals, romans, and motorised solutions.',
-      category: 'Products',
-      fileSize: '3.2 MB',
-      fileUrl: '/style-guide.pdf',
-      downloadCount: 89,
-      status: 'active',
-      createdAt: '2024-01-10',
-      updatedAt: null,
+      title: 'ALLUSION®',
+      subtitle: 'Allusion Blinds',
+      description: 'A combination of sheer and opaque textured fabric for our most elegant blind yet.',
+      category: 'Blinds',
+      fileUrl: 'https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/brochures/Allusion.pdf',
+      image: '/assets/brochures/NowestImages/allusion/Allusion-Landscape-size-Horizon_Nordic_Dine.jpg.webp'
     },
     {
       id: '3',
-      title: 'Commercial Solutions 2024',
-      subtitle: 'Professional Window Treatments',
-      description: 'Professional window treatments for offices and businesses. Complete range of commercial blinds, curtains, and automated solutions.',
-      category: 'Commercial',
-      fileSize: '2.8 MB',
-      fileUrl: '/commercial-brochure.pdf',
-      downloadCount: 45,
-      status: 'active',
-      createdAt: '2024-01-05',
-      updatedAt: null,
+      title: 'PERFECT FIT®',
+      subtitle: 'Perfect Fit Blinds',
+      description: 'Choose innovative Perfect Fit to complement your roller, vision and pleated/cellular blinds.',
+      category: 'Blinds',
+      fileUrl: 'https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/brochures/Collection2024.pdf',
+      image: '/assets/brochures/NowestImages/perfect/Landscape_Perfect_Fit_Next_Generation_Cellular_Halo_Marine_Liv-1536x1097.jpg.webp'
+    },
+    {
+      id: '4',
+      title: 'MOTORISED',
+      subtitle: 'Motorised Blinds',
+      description: 'Automated blinds for modern homes offering centralized control and energy management.',
+      category: 'Blinds',
+      fileUrl: 'https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/brochures/Commercial2024.pdf',
+      image: '/assets/brochures/NowestImages/roller/Landscape_Petal_White_Liv-1024x731.jpg.webp'
     },
   ];
 
-  const handleDownload = (brochure: any) => {
-    if (brochure.fileUrl) {
+  const handleViewOnline = (brochure: any) => {
+    const pdfUrl = brochure.fileUrl || brochure.pdf_path;
+    if (pdfUrl) {
+      // Convert relative paths to S3 URLs if needed
+      let finalUrl = pdfUrl;
+      if (!finalUrl.startsWith('http')) {
+        if (finalUrl.startsWith('/')) {
+          finalUrl = `https://jgi-menteetracker.s3.ap-south-1.amazonaws.com${finalUrl}`;
+        } else {
+          finalUrl = `https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/${finalUrl}`;
+        }
+      }
+      window.open(finalUrl, '_blank');
+    }
+  };
+
+  const handleDownloadPDF = (brochure: any) => {
+    const pdfUrl = brochure.fileUrl || brochure.pdf_path;
+    if (pdfUrl) {
+      // Convert relative paths to S3 URLs if needed
+      let finalUrl = pdfUrl;
+      if (!finalUrl.startsWith('http')) {
+        if (finalUrl.startsWith('/')) {
+          finalUrl = `https://jgi-menteetracker.s3.ap-south-1.amazonaws.com${finalUrl}`;
+        } else {
+          finalUrl = `https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/${finalUrl}`;
+        }
+      }
+      
       // Create a temporary link to download the file
       const link = document.createElement('a');
-      link.href = brochure.fileUrl;
-      link.download = `${brochure.title}.pdf`;
+      link.href = finalUrl;
+      link.download = `${brochure.title || 'brochure'}.pdf`;
       link.target = '_blank';
       document.body.appendChild(link);
       link.click();
@@ -90,65 +105,13 @@ export default function Brochures() {
     }
   };
 
-  const handlePreview = (brochure: any) => {
-    if (brochure.fileUrl) {
-      window.open(brochure.fileUrl, '_blank');
-    }
-  };
-
   if (isLoading) {
     return (
-      <div className="py-24 px-4">
+      <div className="py-16 sm:py-20 md:py-24 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          {/* Navigation Tabs */}
-          <div className="flex justify-center mb-12">
-            <div className="bg-gray-100 rounded-lg p-1 flex w-full max-w-2xl">
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`flex-1 px-8 py-4 rounded-md font-medium transition-all duration-200 ${
-                    selectedCategory === category.id
-                      ? 'bg-white text-black shadow-sm'
-                      : 'bg-transparent text-gray-600 hover:text-black'
-                  }`}
-                >
-                  {category.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="text-center mb-16">
-            {/* Product Brochures - Large serif heading */}
-            <h1 className="font-serif text-5xl md:text-6xl font-bold mb-6 text-black">
-              Product Brochures
-            </h1>
-            
-            {/* Loading text */}
-            <p className="text-gray-600 text-lg">
-              Loading brochures...
-            </p>
-          </div>
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="py-24 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h1 className="font-serif text-5xl md:text-6xl font-bold mb-6">
-              Our Brochures
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Unable to load brochures. Please try again later.
-            </p>
+          <div className="text-center mb-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="text-gray-600 mt-4">Loading brochures...</p>
           </div>
         </div>
       </div>
@@ -156,84 +119,152 @@ export default function Brochures() {
   }
 
   return (
-    <div className="py-24 px-4">
+    <div className="py-8 sm:py-12 md:py-16 lg:py-20 xl:py-24 px-4 sm:px-6 md:px-8 bg-white">
       <div className="max-w-7xl mx-auto">
-        {/* Navigation Tabs */}
-        <div className="flex justify-center mb-12 px-4">
-          <div className="bg-gray-100 rounded-lg p-1 flex w-full max-w-2xl">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`flex-1 px-3 sm:px-6 lg:px-8 py-3 sm:py-4 rounded-md font-medium transition-all duration-200 text-sm sm:text-base ${
-                  selectedCategory === category.id
-                    ? 'bg-white text-black shadow-sm'
-                    : 'bg-transparent text-gray-600 hover:text-black'
-                }`}
-              >
-                {category.label}
-              </button>
-            ))}
+        {/* Header */}
+        <div className="text-center mb-8 sm:mb-12 md:mb-16">
+          <div className="mb-4 sm:mb-6 md:mb-8">
+            <img 
+              src="/assets/LOGO PNG.png" 
+              alt="Nowest Interior Ltd" 
+              className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 xl:w-56 xl:h-56 mx-auto object-contain"
+            />
           </div>
-        </div>
-
-        <div className="text-center mb-16">
+          
+          {/* BROCHURES - Small uppercase text */}
+          <p className="text-xs sm:text-sm font-medium tracking-wider uppercase mb-2 sm:mb-3 md:mb-4 px-2" style={{ color: '#B8860B' }}>
+            BROCHURES
+          </p>
+          
           {/* Product Brochures - Large serif heading */}
-          <h1 className="font-serif text-5xl md:text-6xl font-bold mb-6 text-black">
+          <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-2 sm:mb-3 md:mb-4 text-black px-2">
             Product Brochures
           </h1>
           
-          {/* Description */}
-          <p className="text-gray-700 text-lg max-w-3xl mx-auto mb-8">
-            Browse our collection of product brochures featuring our complete range of blinds, curtains, and window treatments. View them directly in your browser or download for later reference.
-          </p>
+          {/* Golden line */}
+          <div className="w-10 sm:w-12 md:w-16 h-0.5 sm:h-1 mx-auto mb-2 sm:mb-3 md:mb-4" style={{ backgroundColor: '#B8860B' }}></div>
           
-          {error && !brochuresData && (
-            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg max-w-md mx-auto">
-              <p className="text-sm text-yellow-700">
-                Showing sample brochures. Real data will load when connection is restored.
-              </p>
-            </div>
-          )}
+          {/* Description */}
+          <p className="text-gray-600 text-xs sm:text-sm md:text-base max-w-3xl mx-auto px-4">
+            Browse our collection of product brochures featuring our complete range of blinds, curtains, and window treatments.
+          </p>
         </div>
 
-        {/* Brochures Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {brochures.map((brochure) => (
-            <div key={brochure.id} className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 p-6">
-              {/* Document Icon */}
-              <div className="flex items-start justify-between mb-4">
-                <FileText className="h-8 w-8 text-gray-400" />
-                <ExternalLink className="h-4 w-4 text-gray-400" />
-              </div>
-              
-              {/* Title and Subtitle */}
-              <div className="mb-4">
-                <h3 className="font-serif text-xl font-bold text-gray-900 mb-1">
-                  {brochure.title}
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  {brochure.subtitle}
-                </p>
-              </div>
-              
-              {/* Description */}
-              <p className="text-gray-600 text-sm leading-relaxed mb-6">
-                {brochure.description}
-              </p>
-              
-              {/* View PDF Button */}
-              <Button 
-                onClick={() => handleDownload(brochure)}
-                className="w-full bg-golden-orange hover:bg-golden-orange/90 text-white font-medium"
-                disabled={!brochure.fileUrl}
+        {/* Brochures Grid - Matching the image design */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 lg:gap-10">
+          {finalBrochures.map((brochure: any) => {
+            // Get brochure image - use from data or fallback
+            const brochureImage = brochure.image || `/assets/brochures/NowestImages/collection/Landscape_Haven-Oatmeal_BO_Kids-1536x1097.jpg.webp`;
+            
+            return (
+              <div 
+                key={brochure.id} 
+                className="relative group flex flex-col"
+                style={{
+                  border: '1px solid #FF6B35', // Orange border
+                  borderRadius: '4px',
+                  overflow: 'hidden',
+                  background: 'linear-gradient(to bottom, #3a3a3a 0%, #d4d4d4 100%)', // Dark grey to light grey gradient
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1)',
+                  padding: '16px',
+                  minHeight: '100%',
+                }}
               >
-                <FileText className="h-4 w-4 mr-2" />
-                View PDF
-              </Button>
-            </div>
-          ))}
+                {/* Brochure Image Container with tilt effect and shadow */}
+                <div 
+                  className="relative mb-4"
+                  style={{
+                    transform: 'rotate(-3deg)',
+                    transformOrigin: 'center center',
+                    filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4))',
+                  }}
+                >
+                  <div 
+                    className="relative bg-white rounded-sm overflow-hidden"
+                    style={{
+                      boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)',
+                    }}
+                  >
+                    <img
+                      src={brochureImage}
+                      alt={brochure.title || 'Brochure'}
+                      className="w-full h-auto object-cover"
+                      style={{
+                        aspectRatio: '3/4',
+                        display: 'block',
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.src = '/assets/LOGO PNG.png';
+                        e.currentTarget.className = 'w-full h-auto object-contain p-8';
+                        e.currentTarget.onerror = null;
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Content Section */}
+                <div className="px-2 pb-4 min-h-[100px] flex flex-col">
+                  {/* Brochure Title - Dark grey, centered with proper text handling */}
+                  <h3 
+                    className="font-serif text-sm sm:text-base font-bold mb-5 text-center break-words line-clamp-3 mt-2" 
+                    style={{ 
+                      color: '#2d2d2d', 
+                      lineHeight: '1.3',
+                      wordBreak: 'break-word',
+                      overflowWrap: 'anywhere',
+                      hyphens: 'auto'
+                    }}
+                    title={brochure.title || brochure.subtitle || 'Untitled Brochure'}
+                  >
+                    {brochure.title || brochure.subtitle || 'Untitled Brochure'}
+                  </h3>
+                  
+                  {/* Links Section - Centered */}
+                  <div className="flex items-center justify-center gap-3">
+                    {/* VIEW ONLINE Link */}
+                    <button
+                      onClick={() => handleViewOnline(brochure)}
+                      className="text-xs sm:text-sm font-medium hover:underline transition-all cursor-pointer"
+                      style={{ color: '#2d2d2d' }}
+                      disabled={!brochure.fileUrl}
+                    >
+                      VIEW ONLINE
+                    </button>
+                    
+                    {/* Vertical divider */}
+                    <div className="h-3 w-px" style={{ backgroundColor: '#9ca3af' }}></div>
+                    
+                    {/* DOWNLOAD PDF Link */}
+                    <button
+                      onClick={() => handleDownloadPDF(brochure)}
+                      className="text-xs sm:text-sm font-medium hover:underline transition-all cursor-pointer"
+                      style={{ color: '#2d2d2d' }}
+                      disabled={!brochure.fileUrl}
+                    >
+                      DOWNLOAD PDF
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
+
+        {/* Show message if no brochures */}
+        {(!finalBrochures || finalBrochures.length === 0) && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No brochures available at the moment.</p>
+            <p className="text-gray-400 text-sm mt-2">Please check back later or contact us for more information.</p>
+          </div>
+        )}
+
+        {/* Show error message if API failed */}
+        {error && (
+          <div className="text-center py-12">
+            <p className="text-red-500 text-lg">Failed to load brochures.</p>
+            <p className="text-gray-400 text-sm mt-2">Please try refreshing the page or contact support.</p>
+          </div>
+        )}
       </div>
     </div>
   );
