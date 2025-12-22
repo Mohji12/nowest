@@ -100,13 +100,13 @@ export default function Gallery() {
   return (
     <div>
       {/* Header section with background image - Full width */}
-      <div className="relative text-center mb-12 sm:mb-16 overflow-hidden w-full" style={{ minHeight: '400px' }}>
+      <div className="relative text-center mb-12 sm:mb-16 overflow-hidden w-full" style={{ minHeight: '300px' }}>
         {/* Background image */}
         <img
           src={galleryImage}
           alt="Gallery background"
           className="absolute inset-0 w-full h-full object-cover z-0"
-          style={{ minHeight: '400px', width: '100%' }}
+          style={{ minHeight: '300px', width: '100%' }}
           onError={(e) => {
             console.error('Gallery image failed to load:', galleryImage);
             e.currentTarget.src = '/assets/LOGO PNG.png';
@@ -151,7 +151,7 @@ export default function Gallery() {
       </div>
 
       {/* Gallery Grid Section */}
-      <div className="py-16 sm:py-20 md:py-24 px-4 sm:px-6">
+      <div className="py-16 sm:py-20 md:py-24 pb-24 sm:pb-28 md:pb-32 lg:pb-40 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
           {/* Gallery Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">

@@ -123,18 +123,46 @@ export default function Portfolio() {
   ];
 
 
+  // Background image path - using portfolio image from S3
+  const portfolioImage = 'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape_Petal_White_Liv-1024x731.jpg.webp';
+
   if (isLoading) {
     return (
-      <div className="py-16 sm:py-20 md:py-24 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 sm:mb-16">
+      <div>
+        {/* Header section with background image - Full width */}
+        <div className="relative text-center mb-12 sm:mb-16 overflow-hidden w-full" style={{ minHeight: '300px' }}>
+          {/* Background image */}
+          <img
+            src={portfolioImage}
+            alt="Portfolio background"
+            className="absolute inset-0 w-full h-full object-cover z-0"
+            style={{ minHeight: '300px', width: '100%' }}
+            onError={(e) => {
+              console.error('Portfolio image failed to load:', portfolioImage);
+              e.currentTarget.src = '/assets/LOGO PNG.png';
+              e.currentTarget.className = 'absolute inset-0 w-full h-full object-contain z-0 p-8';
+            }}
+          />
+          
+          {/* Overlay for better text readability */}
+          <div className="absolute inset-0 bg-black bg-opacity-30 z-10"></div>
+          
+          {/* Content overlay - Centered with max-width */}
+          <div className="relative z-20 py-12 sm:py-16 md:py-20 px-4 max-w-7xl mx-auto">
+            <div className="mb-6 sm:mb-8">
+              <img 
+                src="/assets/LOGO PNG.png" 
+                alt="Nowest Interior Ltd" 
+                className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 mx-auto object-contain"
+              />
+            </div>
             {/* OUR WORK - Small uppercase text */}
             <p className="text-xs sm:text-sm font-medium tracking-wider uppercase mb-3 sm:mb-4" style={{ color: '#B8860B' }}>
               OUR WORK
             </p>
             
             {/* Portfolio - Large serif heading */}
-            <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 text-black px-2">
+            <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 text-white px-2 drop-shadow-md">
               Portfolio
             </h1>
             
@@ -142,13 +170,13 @@ export default function Portfolio() {
             <div className="w-12 sm:w-16 h-1 mx-auto mb-3 sm:mb-4" style={{ backgroundColor: '#B8860B' }}></div>
             
             {/* Loading text */}
-            <p className="text-gray-600 text-sm sm:text-base">
+            <p className="text-white text-sm sm:text-base drop-shadow-md">
               Loading projects...
             </p>
           </div>
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
+        </div>
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
       </div>
     );
@@ -160,9 +188,27 @@ export default function Portfolio() {
   }
 
   return (
-    <div className="py-16 sm:py-20 md:py-24 px-4 sm:px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12 sm:mb-16">
+    <div>
+      {/* Header section with background image - Full width */}
+      <div className="relative text-center mb-12 sm:mb-16 overflow-hidden w-full" style={{ minHeight: '300px' }}>
+        {/* Background image */}
+        <img
+          src={portfolioImage}
+          alt="Portfolio background"
+          className="absolute inset-0 w-full h-full object-cover z-0"
+          style={{ minHeight: '300px', width: '100%' }}
+          onError={(e) => {
+            console.error('Portfolio image failed to load:', portfolioImage);
+            e.currentTarget.src = '/assets/LOGO PNG.png';
+            e.currentTarget.className = 'absolute inset-0 w-full h-full object-contain z-0 p-8';
+          }}
+        />
+        
+        {/* Overlay for better text readability */}
+        <div className="absolute inset-0 bg-black bg-opacity-30 z-10"></div>
+        
+        {/* Content overlay - Centered with max-width */}
+        <div className="relative z-20 py-12 sm:py-16 md:py-20 px-4 max-w-7xl mx-auto">
           <div className="mb-6 sm:mb-8">
             <img 
               src="/assets/LOGO PNG.png" 
@@ -176,7 +222,7 @@ export default function Portfolio() {
           </p>
           
           {/* Portfolio - Large serif heading */}
-          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 text-black px-2">
+          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 text-white px-2 drop-shadow-md">
             Portfolio
           </h1>
           
@@ -184,7 +230,7 @@ export default function Portfolio() {
           <div className="w-12 sm:w-16 h-1 mx-auto mb-3 sm:mb-4" style={{ backgroundColor: '#B8860B' }}></div>
           
           {/* Project count */}
-          <p className="text-gray-600 text-sm sm:text-base">
+          <p className="text-white text-sm sm:text-base drop-shadow-md">
             {portfolioItems.length} {portfolioItems.length === 1 ? 'Project' : 'Projects'}
           </p>
           
@@ -196,12 +242,18 @@ export default function Portfolio() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Portfolio Content Section */}
+      <div className="px-4 sm:px-6 pb-24 sm:pb-28 md:pb-32 lg:pb-40">
+        <div className="max-w-7xl mx-auto">
 
 
-        <PortfolioGrid 
-          projects={portfolioItems}
-          onProjectClick={(id) => console.log('Project clicked:', id)}
-        />
+          <PortfolioGrid 
+            projects={portfolioItems}
+            onProjectClick={(id) => console.log('Project clicked:', id)}
+          />
+        </div>
       </div>
     </div>
   );

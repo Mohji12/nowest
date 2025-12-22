@@ -1,11 +1,26 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 interface Project {
   id: string;
   title: string;
   subtitle: string;
-  image: string;
+  image?: string;
+  video?: string;
 }
+
+// Helper function to properly encode video paths
+const encodeVideoPath = (path: string): string => {
+  // For files in public folder, we need to encode the filename properly
+  // Split path and encode only the filename part
+  const lastSlash = path.lastIndexOf('/');
+  if (lastSlash === -1) return encodeURIComponent(path);
+  
+  const dir = path.substring(0, lastSlash + 1);
+  const filename = path.substring(lastSlash + 1);
+  
+  // Encode the filename to handle special characters
+  return dir + encodeURIComponent(filename);
+};
 
 interface SignatureCollectionProps {
   projects: Project[];
@@ -13,6 +28,7 @@ interface SignatureCollectionProps {
 
 export default function SignatureCollection({ projects }: SignatureCollectionProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   useEffect(() => {
     let rafId: number | null = null;
@@ -60,10 +76,46 @@ export default function SignatureCollection({ projects }: SignatureCollectionPro
     };
   }, [projects.length]);
 
+  // Load all videos on mount
+  useEffect(() => {
+    videoRefs.current.forEach((video) => {
+      if (video && video.readyState === 0) {
+        video.load();
+      }
+    });
+  }, []);
+
+  // Control video playback based on active index
+  useEffect(() => {
+    videoRefs.current.forEach((video, index) => {
+      if (video) {
+        if (index === activeIndex) {
+          // Ensure video is loaded and ready
+          if (video.readyState >= 2) {
+            video.play().catch((error) => {
+              console.error('Error playing video:', error);
+            });
+          } else {
+            // Wait for video to be ready
+            const handleLoadedData = () => {
+              video.play().catch((error) => {
+                console.error('Error playing video after load:', error);
+              });
+            };
+            video.addEventListener('loadeddata', handleLoadedData, { once: true });
+            video.load();
+          }
+        } else {
+          video.pause();
+        }
+      }
+    });
+  }, [activeIndex]);
+
   return (
     <section
       id="signature-collection"
-      className="py-24"
+      className="py-12 sm:py-16 md:py-24"
       style={{ minHeight: `${projects.length * 100}vh` }}
       data-testid="section-signature-collection"
     >
@@ -76,11 +128,76 @@ export default function SignatureCollection({ projects }: SignatureCollectionPro
             }`}
             data-testid={`signature-project-${project.id}`}
           >
+            {project.video ? (
+              <video
+                ref={(el) => {
+                  videoRefs.current[index] = el;
+                  if (el && project.video) {
+                    // Force load the video
+                    el.load();
+                  }
+                }}
+                src={project.video}
+                muted
+                loop
+                playsInline
+                preload="auto"
+                className="w-full h-full object-cover"
+                style={{ display: 'block' }}
+                onError={(e) => {
+                  const videoElement = e.currentTarget;
+                  const currentSrc = videoElement.currentSrc || videoElement.src;
+                  console.error('Video failed to load:', {
+                    original: project.video,
+                    currentSrc: currentSrc,
+                    readyState: videoElement.readyState,
+                    networkState: videoElement.networkState,
+                    error: videoElement.error
+                  });
+                  
+                  // Try encoded path if original fails
+                  const encodedPath = encodeVideoPath(project.video || '');
+                  if (!currentSrc.includes(encodeURIComponent(project.video.split('/').pop() || ''))) {
+                    console.log('Trying encoded path:', encodedPath);
+                    videoElement.src = encodedPath;
+                    videoElement.load();
+                    return;
+                  }
+                  
+                  // Fallback to image if both paths fail
+                  console.error('Both video paths failed, falling back to image');
+                  if (project.image) {
+                    const img = document.createElement('img');
+                    img.src = project.image;
+                    img.alt = project.title;
+                    img.className = 'w-full h-full object-cover';
+                    videoElement.parentNode?.replaceChild(img, videoElement);
+                  }
+                }}
+                onLoadStart={() => {
+                  console.log('Video load started:', project.video);
+                }}
+                onLoadedMetadata={() => {
+                  console.log('Video metadata loaded:', project.video);
+                }}
+                onCanPlay={() => {
+                  console.log('Video can play:', project.video);
+                  // Play video if it's the active one
+                  if (index === activeIndex && videoRefs.current[index]) {
+                    videoRefs.current[index]?.play().catch(console.error);
+                  }
+                }}
+              >
+                <source src={project.video} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            ) : (
             <img
               src={project.image}
               alt={project.title}
               className="w-full h-full object-cover"
             />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/20" />
             
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 animate-drape-reveal" />

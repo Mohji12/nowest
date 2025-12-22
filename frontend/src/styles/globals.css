@@ -120,6 +120,16 @@
   background: #a8a8a8;
 }
 
+/* Hide scrollbar for auto-scrolling navbar */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
@@ -257,6 +267,60 @@ html {
   /* Prevent zoom on input focus */
   input, textarea, select {
     font-size: 16px;
+  }
+  
+  /* Ensure images are responsive on mobile */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Better mobile grid layouts */
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Improve mobile scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Better mobile typography */
+  h1 {
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+    line-height: 1.3;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+    line-height: 1.4;
+  }
+  
+  /* Ensure tables are scrollable on mobile */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  /* Better mobile form layouts */
+  form {
+    width: 100%;
+  }
+  
+  /* Improve mobile button spacing */
+  button + button {
+    margin-top: 0.5rem;
+  }
+  
+  /* Better mobile card layouts */
+  .card {
+    margin-bottom: 1rem;
   }
 }
 

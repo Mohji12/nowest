@@ -414,7 +414,7 @@ export default function OurServices() {
       </section>
 
       {/* Our Reviews Section */}
-      <section className="pt-32 sm:pt-36 md:pt-40 pb-24 md:pb-28 px-4 bg-card/30">
+      <section className="pt-32 sm:pt-36 md:pt-40 pb-24 sm:pb-28 md:pb-32 lg:pb-40 px-4 bg-card/30">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8 md:mb-12">
             <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold mb-4">

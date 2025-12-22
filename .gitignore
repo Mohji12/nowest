@@ -51,3 +51,8 @@ env/
 *.local
 .turbo
 
+# Large zip files
+*.zip
+app/nowest_backend.zip
+frontend/nowest_frontend.zip
+

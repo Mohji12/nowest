@@ -5,11 +5,12 @@ import { ChevronDown } from 'lucide-react';
 interface HeroSectionProps {
   title: string;
   subtitle?: string;
-  image: string;
+  image?: string;
+  video?: string;
   onExplore?: () => void;
 }
 
-export default function HeroSection({ title, subtitle, image, onExplore }: HeroSectionProps) {
+export default function HeroSection({ title, subtitle, image, video, onExplore }: HeroSectionProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [scrollY, setScrollY] = useState(0);
 
@@ -26,18 +27,41 @@ export default function HeroSection({ title, subtitle, image, onExplore }: HeroS
 
   return (
     <section className="relative h-screen w-full overflow-hidden">
+      {/* Video Background */}
+      {video ? (
+        <div className="absolute inset-0">
+          <video
+            className="absolute inset-0 w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+            style={{ 
+              transform: `translateY(${scrollY * 0.5}px)`,
+              minHeight: '100%',
+              minWidth: '100%'
+            }}
+          >
+            <source src={video} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40" />
+        </div>
+      ) : (
+        /* Image Background Fallback */
       <div 
         className="absolute inset-0 bg-cover bg-center parallax-slow"
         style={{ 
-          backgroundImage: `url(${image})`,
+            backgroundImage: image ? `url(${image})` : undefined,
           transform: `translateY(${scrollY * 0.5}px)`
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40" />
       </div>
+      )}
 
       {/* Logo at the top center */}
-      <div className="absolute top-1 left-1/2 -translate-x-1/2 z-20">
+      <div className="absolute top-2 sm:top-4 left-1/2 -translate-x-1/2 z-20">
         <div 
           className={`transition-all duration-1000 delay-200 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
@@ -46,7 +70,7 @@ export default function HeroSection({ title, subtitle, image, onExplore }: HeroS
           <img 
             src="/assets/LOGO PNG.png" 
             alt="Nowest Interior Ltd" 
-            className="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 xl:w-72 xl:h-72 object-contain filter drop-shadow-lg"
+            className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 object-contain filter drop-shadow-lg"
           />
         </div>
       </div>
@@ -88,10 +112,10 @@ export default function HeroSection({ title, subtitle, image, onExplore }: HeroS
 
         <button
           onClick={onExplore}
-          className="absolute bottom-12 left-1/2 -translate-x-1/2 text-white/80 animate-bounce hover:text-primary transition-colors"
+          className="absolute bottom-8 sm:bottom-12 left-1/2 -translate-x-1/2 text-white/80 animate-bounce hover:text-primary transition-colors"
           data-testid="button-scroll-indicator"
         >
-          <ChevronDown className="w-8 h-8" />
+          <ChevronDown className="w-6 h-6 sm:w-8 sm:h-8" />
         </button>
       </div>
     </section>

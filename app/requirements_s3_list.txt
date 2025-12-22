@@ -1,0 +1,7 @@
+# Additional requirements for listing S3 images
+# Install with: pip install -r app/requirements_s3_list.txt
+
+boto3>=1.28.0
+
+
+

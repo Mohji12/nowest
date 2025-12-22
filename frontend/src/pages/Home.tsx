@@ -1,42 +1,34 @@
-import { useState } from 'react';
 import HeroSection from '@/components/HeroSection';
 import SignatureCollection from '@/components/SignatureCollection';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
-import { Maximize2, Moon, Zap, Layers } from 'lucide-react';
 
 // Image paths from public assets (files in public directory are served at root)
 const heroImage = '/assets/WhatsApp Image 2025-12-03 at 15.34.24_06ffa5f6.jpg';
-const sheerImage = '/assets/generated_images/Luxury_sheer_curtains_hero_53aa2ee0.png';
-const blackoutImage = '/assets/generated_images/Blackout_curtains_bedroom_luxury_675bdda2.png';
-const motorizedImage = '/assets/generated_images/Motorized_office_curtains_modern_7739fdbe.png';
-const romanImage = '/assets/generated_images/Roman_blinds_dining_room_6a3151e1.png';
-const layeredImage = '/assets/generated_images/Layered_curtains_living_room_540027a7.png';
 const dramaticImage = '/assets/stock_images/luxury_curtains_flow_9cf016a6.jpg';
 const whatsappImage = '/assets/WhatsApp Image 2025-12-03 at 15.34.24_06ffa5f6.jpg';
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const [activeCategory, setActiveCategory] = useState(0);
 
   const signatureProjects = [
     {
       id: '1',
       title: 'Ethereal Elegance',
       subtitle: 'Sheer Curtains',
-      image: sheerImage,
+      video: `/assets/videos/Ditto_mohan_Create_a_5-second_cinematic_luxury_interior_video_for_a_premium_c.mp4`,
     },
     {
       id: '2',
       title: 'Midnight Sanctuary',
       subtitle: 'Blackout Solutions',
-      image: blackoutImage,
+      video: `/assets/videos/Ditto_mohan_Create_a_10-second_cinematic_luxury_interior_video_for_the_homepa.mp4`,
     },
     {
       id: '3',
       title: 'Layered Luxury',
       subtitle: 'Dual-Layer Systems',
-      image: layeredImage,
+      video: '/assets/videos/video5.mp4',
     },
     {
       id: '4',
@@ -52,37 +44,6 @@ export default function Home() {
     },
   ];
 
-  const curtainTypes = [
-    {
-      id: 'sheer',
-      name: 'Sheers',
-      icon: Maximize2,
-      description: 'Elegant translucent fabrics that filter natural light while maintaining privacy and creating an ethereal ambiance.',
-      image: sheerImage
-    },
-    {
-      id: 'blackout',
-      name: 'Blackout',
-      icon: Moon,
-      description: 'Complete light control and privacy with luxurious fabrics that offer superior insulation and sophisticated aesthetics.',
-      image: blackoutImage
-    },
-    {
-      id: 'motorized',
-      name: 'Motorized',
-      icon: Zap,
-      description: 'Smart automation meets luxury design. Control your curtains with precision using advanced motorization technology.',
-      image: motorizedImage
-    },
-    {
-      id: 'roman',
-      name: 'Roman Blinds',
-      icon: Layers,
-      description: 'Classic elegance with clean horizontal folds. Perfect for a tailored, sophisticated window treatment.',
-      image: romanImage
-    }
-  ];
-
   const scrollToExplorer = () => {
     document.getElementById('curtain-explorer')?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -92,6 +53,7 @@ export default function Home() {
       <HeroSection
         title="Nowest Interior Ltd"
         subtitle="Luxury Blinds & Curtains Handcrafted in the UK Since 2002"
+        video="/assets/videos/Ditto_mohan_Create_an_ultra-luxury_cinematic_hero_video_for_a_premium_custom-.mp4"
         image={heroImage}
         onExplore={scrollToExplorer}
       />
@@ -99,78 +61,117 @@ export default function Home() {
       <SignatureCollection projects={signatureProjects} />
 
       <div id="curtain-explorer">
-        <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6">
+        <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 bg-white">
           <div className="max-w-6xl mx-auto">
-            {/* Header Section - Mobile Optimized */}
+            {/* Header Section */}
             <div className="text-center mb-12 sm:mb-16">
-              <p className="text-golden-orange text-xs sm:text-sm font-medium tracking-wider uppercase mb-3 sm:mb-4">
-                OUR SERVICES
-              </p>
-              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-black mb-3 sm:mb-4 px-2">
-                Explore Our Collection
+              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-golden-orange mb-4 px-2">
+                browse by room
               </h2>
-              <div className="w-12 sm:w-16 h-1 bg-golden-orange mx-auto"></div>
+              <div className="relative w-24 sm:w-32 h-0.5 bg-golden-orange mx-auto">
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-black rounded-full"></div>
+              </div>
             </div>
 
-            {/* Category Navigation Grid - Mobile Optimized */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-12 sm:mb-16 max-w-4xl mx-auto">
-              {curtainTypes.map((type, index) => {
-                const Icon = type.icon;
-                const isActive = index === activeCategory;
-                
-                return (
-                  <div 
-                    key={type.id} 
-                    onClick={() => setActiveCategory(index)}
-                    className={`category-card group cursor-pointer p-3 sm:p-4 rounded-lg transition-all duration-200 ${
-                      isActive 
-                        ? 'bg-golden-orange text-white active shadow-lg' 
-                        : 'bg-white text-black border border-gray-200 hover:border-golden-orange/30'
-                    }`}
-                  >
-                    <div className="flex flex-col items-center text-center">
-                      <div className={`w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center mb-1 sm:mb-2 ${
-                        isActive ? 'text-white' : 'text-black'
-                      }`}>
-                        <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
-                      </div>
-                      <h3 className={`font-medium text-xs sm:text-sm ${
-                        isActive ? 'text-white' : 'text-black'
-                      }`}>
-                        {type.name}
-                      </h3>
-                    </div>
+            {/* Room Cards Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+              {/* Kitchen */}
+              <div 
+                className="group cursor-pointer"
+                onClick={() => setLocation('/rooms/kitchen')}
+              >
+                <div className="relative overflow-hidden rounded-t-[50%] rounded-b-lg mb-3 shadow-md hover:shadow-xl transition-shadow duration-300">
+                  <div className="aspect-[3/4] w-full">
+                    <img
+                      src="https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Portrait_Kitchen_Perfect_Fit_NG_Roller_Bubbles_White.jpg.webp"
+                      alt="Kitchen"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        console.error('Kitchen image failed to load');
+                        e.currentTarget.src = '/assets/LOGO PNG.png';
+                      }}
+                    />
                   </div>
-                );
-              })}
-            </div>
-
-            {/* Main Product Showcase - Mobile Optimized */}
-            <div className="relative overflow-hidden rounded-xl sm:rounded-2xl">
-              <div className="relative h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px]">
-                <img
-                  src={curtainTypes[activeCategory].image}
-                  alt={curtainTypes[activeCategory].name}
-                  className="w-full h-full object-cover transition-all duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                
-                {/* Text Overlay - Mobile Optimized */}
-                <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-4 sm:left-6 md:left-8 right-4 sm:right-6 md:right-auto max-w-md">
-                  <h3 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-3 md:mb-4">
-                    {curtainTypes[activeCategory].name}
-                  </h3>
-                  <p className="text-white text-sm sm:text-base md:text-lg leading-relaxed">
-                    {curtainTypes[activeCategory].description}
-                  </p>
                 </div>
+                <h3 className="text-center text-sm sm:text-base font-medium text-[#8B4513] uppercase tracking-wide">
+                  KITCHEN
+                </h3>
+              </div>
+
+              {/* Bathroom */}
+              <div 
+                className="group cursor-pointer"
+                onClick={() => setLocation('/rooms/bathroom')}
+              >
+                <div className="relative overflow-hidden rounded-t-[50%] rounded-b-lg mb-3 shadow-md hover:shadow-xl transition-shadow duration-300">
+                  <div className="aspect-[3/4] w-full">
+                    <img
+                      src="https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Roll-Portrait-size-Azalea-Pink_BO_Bath.jpg.webp"
+                      alt="Bathroom"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        console.error('Bathroom image failed to load');
+                        e.currentTarget.src = '/assets/LOGO PNG.png';
+                      }}
+                    />
+                  </div>
+                </div>
+                <h3 className="text-center text-sm sm:text-base font-medium text-[#8B4513] uppercase tracking-wide">
+                  BATHROOM
+                </h3>
+              </div>
+
+              {/* Bedroom */}
+              <div 
+                className="group cursor-pointer"
+                onClick={() => setLocation('/rooms/bedroom')}
+              >
+                <div className="relative overflow-hidden rounded-t-[50%] rounded-b-lg mb-3 shadow-md hover:shadow-xl transition-shadow duration-300">
+                  <div className="aspect-[3/4] w-full">
+                    <img
+                      src="https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Vert-Landscape-size-Petal-Terracotta_Bed_Main.jpg.webp"
+                      alt="Bedroom"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        console.error('Bedroom image failed to load');
+                        e.currentTarget.src = '/assets/LOGO PNG.png';
+                      }}
+                    />
+                  </div>
+                </div>
+                <h3 className="text-center text-sm sm:text-base font-medium text-[#8B4513] uppercase tracking-wide">
+                  BEDROOM
+                </h3>
+              </div>
+
+              {/* Living Room */}
+              <div 
+                className="group cursor-pointer"
+                onClick={() => setLocation('/rooms/living-room')}
+              >
+                <div className="relative overflow-hidden rounded-t-[50%] rounded-b-lg mb-3 shadow-md hover:shadow-xl transition-shadow duration-300">
+                  <div className="aspect-[3/4] w-full">
+                    <img
+                      src="https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape_Petal_White_Liv-1024x731.jpg.webp"
+                      alt="Living Room"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        console.error('Living Room image failed to load');
+                        e.currentTarget.src = '/assets/LOGO PNG.png';
+                      }}
+                    />
+                  </div>
+                </div>
+                <h3 className="text-center text-sm sm:text-base font-medium text-[#8B4513] uppercase tracking-wide">
+                  LIVING ROOM
+                </h3>
               </div>
             </div>
           </div>
         </section>
       </div>
 
-      <section className="relative py-16 sm:py-20 md:py-24 lg:py-32 px-4 sm:px-6 text-center overflow-hidden">
+      <section className="relative py-16 sm:py-20 md:py-24 lg:py-32 pb-24 sm:pb-28 md:pb-32 lg:pb-40 px-4 sm:px-6 text-center overflow-hidden">
         <div className="relative max-w-3xl mx-auto">
           
           <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 px-2 animate-fade-slide-up" data-testid="text-cta-heading">

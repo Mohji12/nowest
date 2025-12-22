@@ -32,9 +32,12 @@ const defaultItems: NavItem[] = [
 export default function FloatingNav({ activeItem = 'home', items = defaultItems }: FloatingNavProps) {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navListRef = useRef<HTMLUListElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
   const [, setLocation] = useLocation();
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -48,6 +51,88 @@ export default function FloatingNav({ activeItem = 'home', items = defaultItems 
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Auto-scroll functionality for mobile
+  useEffect(() => {
+    if (!isMobile || !scrollContainerRef.current || !navListRef.current) return;
+
+    const scrollContainer = scrollContainerRef.current;
+    const navList = navListRef.current;
+    let animationFrameId: number;
+    let scrollPosition = 0;
+    const scrollSpeed = 0.3; // pixels per frame (slower for smoother effect)
+    let direction = 1; // 1 for right to left, -1 for left to right
+    let lastTime = performance.now();
+
+    const scroll = (currentTime: number) => {
+      if (isPaused) {
+        lastTime = currentTime;
+        animationFrameId = requestAnimationFrame(scroll);
+        return;
+      }
+
+      const deltaTime = currentTime - lastTime;
+      lastTime = currentTime;
+
+      // Calculate max scroll based on container width
+      const maxScroll = navList.scrollWidth - scrollContainer.clientWidth;
+      
+      if (maxScroll <= 0) {
+        // No need to scroll if content fits
+        animationFrameId = requestAnimationFrame(scroll);
+        return;
+      }
+
+      // Adjust scroll speed based on frame time for consistency
+      const adjustedSpeed = scrollSpeed * (deltaTime / 16.67); // Normalize to 60fps
+      scrollPosition += adjustedSpeed * direction;
+
+      // Reverse direction when reaching edges with smooth transition
+      if (scrollPosition >= maxScroll) {
+        scrollPosition = maxScroll;
+        // Wait a bit before reversing
+        setTimeout(() => {
+          direction = -1;
+        }, 1000);
+      } else if (scrollPosition <= 0) {
+        scrollPosition = 0;
+        // Wait a bit before reversing
+        setTimeout(() => {
+          direction = 1;
+        }, 1000);
+      }
+
+      scrollContainer.scrollLeft = scrollPosition;
+      animationFrameId = requestAnimationFrame(scroll);
+    };
+
+    // Start scrolling after a short delay
+    const startTimeout = setTimeout(() => {
+      animationFrameId = requestAnimationFrame(scroll);
+    }, 500);
+
+    // Pause on hover/touch
+    const handleMouseEnter = () => setIsPaused(true);
+    const handleMouseLeave = () => setIsPaused(false);
+    const handleTouchStart = () => setIsPaused(true);
+    const handleTouchEnd = () => {
+      setTimeout(() => setIsPaused(false), 2000); // Resume after 2 seconds
+    };
+
+    scrollContainer.addEventListener('mouseenter', handleMouseEnter);
+    scrollContainer.addEventListener('mouseleave', handleMouseLeave);
+    scrollContainer.addEventListener('touchstart', handleTouchStart);
+    scrollContainer.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      clearTimeout(startTimeout);
+      cancelAnimationFrame(animationFrameId);
+      scrollContainer.removeEventListener('mouseenter', handleMouseEnter);
+      scrollContainer.removeEventListener('mouseleave', handleMouseLeave);
+      scrollContainer.removeEventListener('touchstart', handleTouchStart);
+      scrollContainer.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isMobile, isPaused]);
 
   const handleItemClick = (item: NavItem) => {
     if (item.subItems) {
@@ -68,11 +153,11 @@ export default function FloatingNav({ activeItem = 'home', items = defaultItems 
   // Dynamic sizing based on device type
   const getNavbarClasses = () => {
     if (isMobile) {
-      return "fixed bottom-4 left-1/2 -translate-x-1/2 z-50 backdrop-blur-xl bg-card/90 border border-card-border rounded-full px-4 py-3 shadow-lg max-w-[95vw]";
+      return "fixed bottom-2 left-1/2 -translate-x-1/2 z-50 backdrop-blur-xl bg-card/90 border border-card-border rounded-full py-3 shadow-lg max-w-[95vw] overflow-hidden";
     } else if (isTablet) {
-      return "fixed bottom-4 left-1/2 -translate-x-1/2 z-50 backdrop-blur-xl bg-card/90 border border-card-border rounded-full px-6 py-2.5 shadow-lg max-w-[85vw]";
+      return "fixed bottom-2 left-1/2 -translate-x-1/2 z-50 backdrop-blur-xl bg-card/90 border border-card-border rounded-full px-6 py-2.5 shadow-lg max-w-[85vw]";
     } else {
-      return "fixed bottom-6 left-1/2 -translate-x-1/2 z-50 backdrop-blur-xl bg-card/90 border border-card-border rounded-full px-8 py-3 shadow-lg";
+      return "fixed bottom-4 left-1/2 -translate-x-1/2 z-50 backdrop-blur-xl bg-card/90 border border-card-border rounded-full px-8 py-3 shadow-lg";
     }
   };
 
@@ -88,10 +173,26 @@ export default function FloatingNav({ activeItem = 'home', items = defaultItems 
 
   return (
     <nav 
+      ref={scrollContainerRef}
       className={getNavbarClasses()}
       data-testid="nav-floating"
     >
-      <ul className={getGapClasses()}>
+      <div 
+        ref={scrollContainerRef}
+        className={isMobile ? 'overflow-x-auto scrollbar-hide px-4' : ''}
+      >
+        <ul 
+          ref={navListRef}
+          className={`${getGapClasses()} ${isMobile ? 'whitespace-nowrap' : ''}`}
+          style={isMobile ? {
+            scrollBehavior: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            display: 'inline-flex',
+            width: 'max-content',
+          } : {}}
+        >
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = activeItem === item.id || (item.subItems && item.subItems.some(sub => activeItem === sub.id));
@@ -205,7 +306,8 @@ export default function FloatingNav({ activeItem = 'home', items = defaultItems 
             </li>
           );
         })}
-      </ul>
+        </ul>
+      </div>
     </nav>
   );
 }
