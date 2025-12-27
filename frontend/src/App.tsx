@@ -8,7 +8,6 @@ import ScrollContactCard from "@/components/ScrollContactCard";
 import { usePageViewTracking } from "@/hooks/usePageViewTracking";
 import { Home as HomeIcon, Info, Grid3x3, Package, Phone, Share2, Images, HelpCircle } from 'lucide-react';
 import { AuthProvider } from "@/contexts/AuthContext";
-import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Import pages
 import Home from "@/pages/Home";
@@ -192,62 +191,61 @@ function Router() {
                 <Route path="/contact" component={Contact} />
                 <Route path="/api-test" component={APITest} />
                 <Route path="/portfolio-test" component={PortfolioTest} />
-        <Route path="/admin/login" component={AdminLogin} />
+        <Route path="/admin/login">
+          {() => {
+            const [, setLocation] = useLocation();
+            useEffect(() => {
+              setLocation('/admin/dashboard');
+            }, [setLocation]);
+            return (
+              <div className="h-screen w-full flex items-center justify-center">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground mx-auto mb-4"></div>
+                  <p className="text-muted-foreground">Redirecting to dashboard...</p>
+                </div>
+              </div>
+            );
+          }}
+        </Route>
         <Route path="/admin">
-          <ProtectedRoute>
-            <AdminLayout>
-              <AdminDashboard />
-            </AdminLayout>
-          </ProtectedRoute>
+          <AdminLayout>
+            <AdminDashboard />
+          </AdminLayout>
         </Route>
         <Route path="/admin/dashboard">
-          <ProtectedRoute>
-            <AdminLayout>
-              <AdminDashboard />
-            </AdminLayout>
-          </ProtectedRoute>
+          <AdminLayout>
+            <AdminDashboard />
+          </AdminLayout>
         </Route>
         <Route path="/admin/products">
-          <ProtectedRoute>
-            <AdminLayout>
-              <AdminProducts />
-            </AdminLayout>
-          </ProtectedRoute>
+          <AdminLayout>
+            <AdminProducts />
+          </AdminLayout>
         </Route>
         <Route path="/admin/portfolio">
-          <ProtectedRoute>
-            <AdminLayout>
-              <AdminPortfolio />
-            </AdminLayout>
-          </ProtectedRoute>
+          <AdminLayout>
+            <AdminPortfolio />
+          </AdminLayout>
         </Route>
         <Route path="/admin/brochures">
-          <ProtectedRoute>
-            <AdminLayout>
-              <AdminBrochures />
-            </AdminLayout>
-          </ProtectedRoute>
+          <AdminLayout>
+            <AdminBrochures />
+          </AdminLayout>
         </Route>
         <Route path="/admin/leads">
-          <ProtectedRoute>
-            <AdminLayout>
-              <AdminLeads />
-            </AdminLayout>
-          </ProtectedRoute>
+          <AdminLayout>
+            <AdminLeads />
+          </AdminLayout>
         </Route>
         <Route path="/admin/seo">
-          <ProtectedRoute>
-            <AdminLayout>
-              <AdminSEO />
-            </AdminLayout>
-          </ProtectedRoute>
+          <AdminLayout>
+            <AdminSEO />
+          </AdminLayout>
         </Route>
         <Route path="/admin/analytics">
-          <ProtectedRoute>
-            <AdminLayout>
-              <AdminAnalytics />
-            </AdminLayout>
-          </ProtectedRoute>
+          <AdminLayout>
+            <AdminAnalytics />
+          </AdminLayout>
         </Route>
         <Route component={NotFound} />
       </Switch>

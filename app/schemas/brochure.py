@@ -23,6 +23,7 @@ class BrochureCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=255, description="Brochure title")
     description: str = Field(..., min_length=1, description="Brochure description")
     pdf_path: str = Field(..., min_length=1, max_length=500, description="PDF file path")
+    image: Optional[str] = Field(None, max_length=500, description="Image URL for brochure card")
 
 
 class BrochureUpdate(BaseModel):
@@ -30,6 +31,7 @@ class BrochureUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=1, max_length=255, description="Brochure title")
     description: Optional[str] = Field(None, min_length=1, description="Brochure description")
     pdf_path: Optional[str] = Field(None, min_length=1, max_length=500, description="PDF file path")
+    image: Optional[str] = Field(None, max_length=500, description="Image URL for brochure card")
 
 
 class BrochureResponse(BaseModel):
@@ -38,6 +40,7 @@ class BrochureResponse(BaseModel):
     title: str = Field(..., description="Brochure title")
     description: str = Field(..., description="Brochure description")
     pdf_path: str = Field(..., description="PDF file path")
+    image: Optional[str] = Field(None, description="Image URL for brochure card")
     created_at: Optional[datetime] = Field(None, description="Creation timestamp")
     updated_at: Optional[datetime] = Field(None, description="Last update timestamp")
     

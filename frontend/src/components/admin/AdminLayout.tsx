@@ -30,7 +30,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <SidebarProvider 
       style={style as React.CSSProperties}
-      defaultOpen={false}
+      defaultOpen={true}
     >
       <div className="flex h-screen w-full">
         <Sidebar 
@@ -85,14 +85,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               size="sm"
               className="w-full text-xs sm:text-sm border-gray-300 text-gray-700 hover:bg-gray-50"
               onClick={() => {
-                logout();
-                setLocation("/admin/login");
+                setLocation("/");
               }}
               data-testid="button-logout"
             >
               <LogOut className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Logout</span>
-              <span className="sm:hidden">Logout</span>
+              <span className="hidden sm:inline">Back to Site</span>
+              <span className="sm:hidden">Back</span>
             </Button>
           </div>
         </Sidebar>

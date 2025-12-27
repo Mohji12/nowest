@@ -27,6 +27,9 @@ class Settings:
     port: int = 8000
     debug: bool = True
     
+    # Logging settings
+    log_level: str = "DEBUG" if debug else "INFO"
+    
     # CORS settings
     allowed_origins: list[str] = [
         "http://localhost:5173",  # Local development

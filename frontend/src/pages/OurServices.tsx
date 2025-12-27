@@ -44,11 +44,10 @@ export default function OurServices() {
       {/* Back Button */}
       <div className="fixed top-16 sm:top-20 left-2 sm:left-4 z-40">
         <button
-          onClick={() => setLocation('/about')}
-          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-background/90 backdrop-blur-sm border border-border rounded-full shadow-lg hover:bg-muted transition-all duration-200 group"
+          onClick={() => setLocation('/')}
+          className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-background/90 backdrop-blur-sm border border-border rounded-full shadow-lg hover:bg-muted transition-all duration-200 group"
         >
-          <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform group-hover:-translate-x-1" />
-          <span className="text-xs sm:text-sm font-medium">Back to About</span>
+          <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover:-translate-x-1" />
         </button>
       </div>
 

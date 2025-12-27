@@ -259,9 +259,9 @@ export default function Contact() {
                 We welcome you to visit our showroom by appointment. Contact us via phone or email to schedule a consultation and explore our extensive collection of luxury curtains and blinds.
               </p>
             </div>
+            </div>
           </div>
         </div>
-      </div>
       </div>
     </div>
   );

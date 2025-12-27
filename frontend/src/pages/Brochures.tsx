@@ -6,64 +6,94 @@ export default function Brochures() {
   const { data: brochuresData, isLoading, error } = useQuery({
     queryKey: ['brochures'],
     queryFn: getBrochures,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // Always fetch fresh data to see updates immediately
+    gcTime: 0, // Don't cache to ensure fresh data (gcTime replaces cacheTime in v5+)
   });
 
-  // Process brochures data
-  const brochures = (brochuresData && Array.isArray(brochuresData) ? brochuresData : []).map((item: any) => ({
-    id: item.id?.toString() || Math.random().toString(),
-    title: item.title || 'Untitled Brochure',
-    subtitle: item.subtitle || item.category || 'Product Brochure',
-    description: item.description || 'Download our brochure for more information',
-    category: item.category || 'General',
-    fileSize: item.file_size || 'Unknown',
-    fileUrl: item.file_url || item.pdf_path || null,
-    downloadCount: item.download_count || 0,
-    status: item.status || 'active',
-    createdAt: item.created_at ? new Date(item.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-    updatedAt: item.updated_at ? new Date(item.updated_at).toISOString().split('T')[0] : null,
-  }));
+  // Debug: Log raw API response
+  if (brochuresData && Array.isArray(brochuresData)) {
+    console.log('[Brochures] Raw API response:', brochuresData);
+    console.log('[Brochures] Total brochures from API:', brochuresData.length);
+    if (brochuresData.length > 0) {
+      console.log('[Brochures] First brochure from API:', brochuresData[0]);
+      console.log('[Brochures] First brochure image field:', brochuresData[0]?.image);
+    }
+  }
+  
+  if (error) {
+    console.error('[Brochures] API Error:', error);
+  }
 
-  // Use fallback data if no brochures from API
-  const finalBrochures = brochures.length > 0 ? brochures : [
-    // Fallback data matching the design - 4 brochures like in the image
-    {
-      id: '1',
-      title: 'Uk_panel_brochures',
-      subtitle: 'Panel Blinds Collection',
-      description: 'Browse our collection of product brochures featuring our complete range of blinds, curtains, and window treatments.',
-      category: 'Collection',
-      fileUrl: 'https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/brochures/Collection2024.pdf',
-      image: '/assets/brochures/NowestImages/collection/Landscape_Haven-Oatmeal_BO_Kids-1536x1097.jpg.webp'
-    },
-    {
-      id: '2',
-      title: 'ALLUSION®',
-      subtitle: 'Allusion Blinds',
-      description: 'A combination of sheer and opaque textured fabric for our most elegant blind yet.',
-      category: 'Blinds',
-      fileUrl: 'https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/brochures/Allusion.pdf',
-      image: '/assets/brochures/NowestImages/allusion/Allusion-Landscape-size-Horizon_Nordic_Dine.jpg.webp'
-    },
-    {
-      id: '3',
-      title: 'PERFECT FIT®',
-      subtitle: 'Perfect Fit Blinds',
-      description: 'Choose innovative Perfect Fit to complement your roller, vision and pleated/cellular blinds.',
-      category: 'Blinds',
-      fileUrl: 'https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/brochures/Collection2024.pdf',
-      image: '/assets/brochures/NowestImages/perfect/Landscape_Perfect_Fit_Next_Generation_Cellular_Halo_Marine_Liv-1536x1097.jpg.webp'
-    },
-    {
-      id: '4',
-      title: 'MOTORISED',
-      subtitle: 'Motorised Blinds',
-      description: 'Automated blinds for modern homes offering centralized control and energy management.',
-      category: 'Blinds',
-      fileUrl: 'https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/brochures/Commercial2024.pdf',
-      image: '/assets/brochures/NowestImages/roller/Landscape_Petal_White_Liv-1024x731.jpg.webp'
-    },
-  ];
+  // Process brochures data from API - use image field from database
+  const brochures = (brochuresData && Array.isArray(brochuresData) ? brochuresData : []).map((item: any) => {
+    // Debug logging to see what we're getting from the API
+    console.log(`[Brochures] Processing brochure from API:`, {
+      id: item.id,
+      title: item.title,
+      hasImage: !!item.image,
+      image: item.image,
+      rawItem: item // Log entire item to see all fields
+    });
+    
+    // IMPORTANT: Use item.image directly from database (S3 URL from backend)
+    // Do NOT use any fallback or hardcoded images here
+    return {
+      id: item.id?.toString() || Math.random().toString(),
+      title: item.title || 'Untitled Brochure',
+      subtitle: item.subtitle || item.category || 'Product Brochure',
+      description: item.description || 'Download our brochure for more information',
+      category: item.category || 'General',
+      fileSize: item.file_size || 'Unknown',
+      fileUrl: item.file_url || item.pdf_path || null,
+      downloadCount: item.download_count || 0,
+      status: item.status || 'active',
+      image: item.image || null, // Use image from database column (S3 URL from backend)
+      createdAt: item.created_at ? new Date(item.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      updatedAt: item.updated_at ? new Date(item.updated_at).toISOString().split('T')[0] : null,
+    };
+  });
+
+  // Debug: Log total brochures received
+  console.log(`[Brochures] Total brochures from API: ${brochures.length}`);
+  console.log(`[Brochures] Brochures data:`, brochures);
+
+  // CRITICAL: Always use brochures from API - DO NOT use fallback with local assets
+  // The database has S3 URLs in the image column, so we must use API data only
+  if (brochures.length === 0 && !isLoading && error) {
+    console.error('[Brochures] ERROR: Failed to fetch brochures from API!', error);
+    console.error('[Brochures] Check backend connection and API endpoint.');
+  }
+
+  // Use ONLY API data - no fallback to local assets
+  // If API fails, show empty state or error message, but NEVER use local asset paths
+  const finalBrochures = brochures;
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 sm:py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <p className="text-gray-600">Loading brochures...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if API fails
+  if (error && brochures.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 sm:py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Unable to load brochures</h1>
+            <p className="text-gray-600">Please try again later.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleViewOnline = (brochure: any) => {
     const pdfUrl = brochure.fileUrl || brochure.pdf_path;
@@ -152,9 +182,32 @@ export default function Brochures() {
 
         {/* Brochures Grid - Matching the image design */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 lg:gap-10">
-          {finalBrochures.map((brochure: any) => {
-            // Get brochure image - use from data or fallback
-            const brochureImage = brochure.image || `/assets/brochures/NowestImages/collection/Landscape_Haven-Oatmeal_BO_Kids-1536x1097.jpg.webp`;
+          {finalBrochures.map((brochure: any, index: number) => {
+            console.log(`[Brochures] Rendering brochure ${index + 1}/${finalBrochures.length}: ${brochure.title}`);
+            // Get brochure image from database image column (S3 URL)
+            // The image field comes from the brochures.image column in the database
+            // Backend already converts image paths to full S3 URLs via convert_image_to_s3_url
+            // IMPORTANT: Use brochure.image directly - it's the S3 URL from the database
+            const brochureImage = brochure.image || 'https://via.placeholder.com/400x500?text=No+Image';
+            
+            // Debug logging to verify image from database is being used
+            console.log(`[Brochures] Image for "${brochure.title}":`, {
+              hasImage: !!brochure.image,
+              imageUrl: brochure.image,
+              usingImage: brochureImage,
+              isS3Url: brochure.image?.startsWith('https://') || false,
+              isLocalAsset: brochure.image?.startsWith('/assets/') || false
+            });
+            
+            // WARNING: If image is a local asset path, something is wrong
+            if (brochure.image && brochure.image.startsWith('/assets/')) {
+              console.error(`[Brochures] ERROR: "${brochure.title}" has local asset path instead of S3 URL:`, brochure.image);
+              console.error('[Brochures] This should be an S3 URL from the database!');
+            }
+            
+            if (!brochure.image) {
+              console.warn(`[Brochures] WARNING: No image in database for "${brochure.title}"`);
+            }
             
             return (
               <div 

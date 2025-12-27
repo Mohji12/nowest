@@ -16,7 +16,8 @@ export default function AdminBrochures() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    pdf_path: ''
+    pdf_path: '',
+    image: ''
   });
   
   const { toast } = useToast();
@@ -29,35 +30,16 @@ export default function AdminBrochures() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Type assertion for brochures array and process PDF URLs
+  // Process brochures - backend already converts URLs to full S3 URLs
   const brochuresArray = (brochures as any[]).map((brochure: any) => {
-    // Convert relative PDF paths to absolute S3 URLs
-    const getPdfUrl = (pdfPath: string) => {
-      if (!pdfPath) return '';
-      
-      // If it's already a full URL (S3 or any other), return as is
-      if (pdfPath.startsWith('http')) {
-        return pdfPath;
-      }
-      
-      // If it's a relative path, convert to S3 URL
-      if (pdfPath.startsWith('/')) {
-        // Remove leading slash and construct S3 URL
-        const cleanPath = pdfPath.substring(1);
-        const s3Url = `https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/${cleanPath}`;
-        return s3Url;
-      }
-      
-      // If it's a relative path without leading slash, add it
-      const s3Url = `https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/${pdfPath}`;
-      return s3Url;
-    };
-
-    const processedPdfUrl = getPdfUrl(brochure.pdf_path);
+    // Backend already converts PDF and image paths to full S3 URLs
+    const processedPdfUrl = brochure.pdf_path || '';
+    const processedImageUrl = brochure.image || 'https://via.placeholder.com/400x500?text=No+Image';
 
     return {
       ...brochure,
-      processedPdfUrl
+      processedPdfUrl,
+      processedImageUrl
     };
   });
 
@@ -104,7 +86,8 @@ export default function AdminBrochures() {
       const brochureData = {
         title: formData.title.trim(),
         description: formData.description.trim(),
-        pdf_path: formData.pdf_path.trim()
+        pdf_path: formData.pdf_path.trim(),
+        image: formData.image.trim() || null
       };
 
       console.log('Creating brochure with data:', brochureData);
@@ -144,7 +127,8 @@ export default function AdminBrochures() {
     setFormData({
       title: brochure.title || '',
       description: brochure.description || '',
-      pdf_path: brochure.pdf_path || ''
+      pdf_path: brochure.pdf_path || '',
+      image: brochure.image || ''
     });
     setIsCreateModalOpen(true);
   };
@@ -171,7 +155,7 @@ export default function AdminBrochures() {
   };
 
   const resetForm = () => {
-    setFormData({ title: '', description: '', pdf_path: '' });
+    setFormData({ title: '', description: '', pdf_path: '', image: '' });
     setEditingBrochure(null);
     setIsCreateModalOpen(false);
     setIsSubmitting(false);
@@ -267,6 +251,23 @@ export default function AdminBrochures() {
                     required
                   />
                 </div>
+
+                {/* Image URL Field */}
+                <div className="space-y-2">
+                  <Label htmlFor="image" className="text-sm font-medium text-gray-900">
+                    Image URL (S3 or full URL) - Optional
+                  </Label>
+                  <input
+                    id="image"
+                    placeholder="https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/Nowest_Image/..."
+                    value={formData.image}
+                    onChange={(e) => handleInputChange('image', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-golden-orange focus:border-golden-orange"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Use S3 image URLs from the Nowest_Image folder for brochure card images
+                  </p>
+                </div>
               </div>
 
               <div className="flex justify-end space-x-3 pt-4 border-t">
@@ -293,28 +294,31 @@ export default function AdminBrochures() {
           <p className="text-gray-400 text-sm mt-2">Please try refreshing the page.</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {brochuresArray.map((brochure: any) => (
             <Card key={brochure.id} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  {/* Brochure Icon */}
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-golden-orange/20 rounded-lg flex items-center justify-center">
-                      <FileText className="h-6 w-6 text-golden-orange" />
-                    </div>
-                  </div>
-                  
+              <CardContent className="p-0">
+                {/* Brochure Image */}
+                <div className="aspect-[3/4] overflow-hidden rounded-t-lg bg-gray-100">
+                  <img
+                    src={brochure.processedImageUrl}
+                    alt={brochure.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://via.placeholder.com/400x500?text=No+Image';
+                      e.currentTarget.onerror = null;
+                    }}
+                  />
+                </div>
+                
+                <div className="p-6">
                   {/* Brochure Info */}
-                  <div className="flex-1 min-w-0">
+                  <div className="mb-4">
                     <h3 className="text-lg font-bold text-gray-900 mb-1">
                       {brochure.title}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-2">
+                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
                       {brochure.description}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      PDF: {brochure.processedPdfUrl || brochure.pdf_path}
                     </p>
                   </div>
                   
@@ -325,26 +329,29 @@ export default function AdminBrochures() {
                         variant="ghost"
                         size="sm"
                         onClick={() => window.open(brochure.processedPdfUrl, '_blank')}
-                        className="h-9 w-9 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                        className="flex-1 h-9 text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                       >
-                        <ExternalLink className="h-4 w-4" />
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        View PDF
                       </Button>
                     )}
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleEditBrochure(brochure)}
-                      className="h-9 w-9 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                      className="flex-1 h-9 text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDeleteBrochure(brochure.id)}
-                      className="h-9 w-9 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="flex-1 h-9 text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
                     </Button>
                   </div>
                 </div>

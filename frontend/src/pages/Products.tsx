@@ -39,7 +39,8 @@ export default function Products() {
   const { data: brochuresData, isLoading: brochuresLoading, error: brochuresError } = useQuery({
     queryKey: ['brochures'],
     queryFn: getBrochures,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // Always fetch fresh data to see updates immediately
+    gcTime: 0, // Don't cache to ensure fresh data
   });
 
   const categories = [
@@ -663,7 +664,13 @@ export default function Products() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 lg:gap-10">
-                    {((brochuresData && Array.isArray(brochuresData) && brochuresData.length > 0) ? brochuresData : (Array.isArray(finalProducts.brochures) ? finalProducts.brochures : [])).map((brochure: any, brochureIndex: number) => (
+                    {((brochuresData && Array.isArray(brochuresData) && brochuresData.length > 0) 
+                      ? brochuresData.map((item: any) => ({
+                          ...item,
+                          image: item.image || null, // Use image from database (S3 URL from backend)
+                        }))
+                      : (Array.isArray(finalProducts.brochures) ? finalProducts.brochures : [])
+                    ).map((brochure: any, brochureIndex: number) => (
                       <div 
                         key={brochure.id} 
                         className="relative group flex flex-col transition-all duration-300 hover:scale-105"
@@ -693,18 +700,21 @@ export default function Products() {
                             }}
                           >
                           <img
-                              src={getUniqueBrochureImage(brochure.id?.toString() || '1', brochureIndex)}
+                              src={brochure.image || 'https://via.placeholder.com/400x500?text=No+Image'}
                             alt={brochure.title || brochure.name || 'Brochure'}
                               className="w-full h-auto object-cover"
+                              onLoad={() => {
+                                console.log(`[Products] Loaded brochure image for "${brochure.title}":`, brochure.image);
+                              }}
+                              onError={(e) => {
+                                console.error(`[Products] Failed to load image for "${brochure.title}":`, brochure.image);
+                                e.currentTarget.src = 'https://via.placeholder.com/400x500?text=No+Image';
+                                e.currentTarget.onerror = null;
+                              }}
                               style={{
                                 aspectRatio: '3/4',
                                 display: 'block',
                               }}
-                            onError={(e) => {
-                                e.currentTarget.src = '/assets/LOGO PNG.png';
-                                e.currentTarget.className = 'w-full h-auto object-contain p-8';
-                                e.currentTarget.onerror = null;
-                            }}
                           />
                           </div>
                         </div>

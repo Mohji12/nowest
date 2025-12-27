@@ -6,13 +6,22 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from fastapi import HTTPException, status
 import logging
+import sys
 
 from models.admin import Admin
 from schemas.admin import AdminCreate, AdminResponse
 from utils.auth import hash_password, verify_password
 from config import settings
 
+# Configure logger to ensure it outputs to console
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+if not logger.handlers:
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 
 class AdminService:
@@ -34,11 +43,9 @@ class AdminService:
         try:
             return self.db.query(Admin).filter(Admin.id == admin_id).first()
         except Exception as e:
-            logger.error(f"Error getting admin by ID {admin_id}: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Database error"
-            )
+            logger.error(f"Error getting admin by ID {admin_id}: {e}", exc_info=True)
+            # Return None instead of raising to allow graceful handling
+            return None
     
     def get_admin_by_username(self, username: str) -> Optional[Admin]:
         """
@@ -51,13 +58,14 @@ class AdminService:
             Admin object or None
         """
         try:
-            return self.db.query(Admin).filter(Admin.username == username).first()
+            result = self.db.query(Admin).filter(Admin.username == username).first()
+            logger.debug(f"Query result for username '{username}': {result is not None}")
+            return result
         except Exception as e:
-            logger.error(f"Error getting admin by username {username}: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Database error"
-            )
+            logger.error(f"Error getting admin by username {username}: {e}", exc_info=True)
+            # Don't raise HTTPException here - let the caller handle it
+            # This allows authenticate_admin to return None instead of raising
+            return None
     
     def create_admin(self, admin_data: AdminCreate) -> Admin:
         """
@@ -119,17 +127,36 @@ class AdminService:
             Admin object if authentication successful, None otherwise
         """
         try:
+            logger.info(f"Starting authentication for username: {username}")
             admin = self.get_admin_by_username(username)
             if not admin:
+                logger.warning(f"Admin not found: {username}")
                 return None
             
-            if verify_password(password, admin.password):
-                return admin
+            logger.info(f"Admin found: {admin.username}, ID: {admin.id}")
+            logger.info(f"Stored hash length: {len(admin.password) if admin.password else 0}")
+            logger.info(f"Stored hash starts with: {admin.password[:30] if admin.password else 'None'}...")
+            logger.info(f"Password to verify length: {len(password)}")
             
-            return None
+            # Verify password
+            logger.info(f"Calling verify_password...")
+            verification_result = verify_password(password, admin.password)
+            logger.info(f"Password verification result: {verification_result}")
+            
+            if verification_result:
+                logger.info(f"Admin authenticated successfully: {username}")
+                return admin
+            else:
+                logger.warning(f"Password verification failed for admin: {username}")
+                # Try to debug why verification failed
+                logger.warning(f"Password provided: {password[:3]}... (length: {len(password)})")
+                logger.warning(f"Hash in DB: {admin.password[:30]}... (length: {len(admin.password)})")
+                return None
             
         except Exception as e:
-            logger.error(f"Error authenticating admin {username}: {e}")
+            logger.error(f"Error authenticating admin {username}: {e}", exc_info=True)
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
             return None
     
     def update_admin_password(self, admin_id: str, new_password: str) -> bool:

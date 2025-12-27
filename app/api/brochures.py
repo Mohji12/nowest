@@ -33,6 +33,10 @@ async def get_brochures(
         brochure_service = BrochureService(db)
         brochures = brochure_service.get_all_brochures()
         
+        # Debug logging to verify images are included
+        for brochure in brochures:
+            logger.debug(f"Brochure '{brochure.title}' - Image: {brochure.image}")
+        
         return brochures
         
     except Exception as e:
@@ -181,10 +185,12 @@ async def update_brochure(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error updating brochure {brochure_id}: {e}")
+        logger.error(f"Error updating brochure {brochure_id}: {e}", exc_info=True)
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error updating brochure"
+            detail=f"Error updating brochure: {str(e)}"
         )
 
 

@@ -74,11 +74,27 @@ const RoomDetailLayout: React.FC<RoomDetailLayoutProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Get Quote Button Section */}
+      <section className="py-12 sm:py-16 md:py-20 pb-24 sm:pb-28 md:pb-32 px-4 sm:px-6 bg-card/30">
+        <div className="max-w-4xl mx-auto text-center">
+          <button
+            onClick={() => setLocation('/contact')}
+            className="w-full sm:w-auto px-8 py-4 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 text-base sm:text-lg"
+          >
+            Get Quote
+          </button>
+        </div>
+      </section>
     </div>
   );
 };
 
 export default RoomDetailLayout;
+
+
+
+
 
 
 

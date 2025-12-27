@@ -9,10 +9,23 @@ from passlib.hash import bcrypt
 import secrets
 import hashlib
 import logging
+import warnings
 
 from config import settings
+import sys
 
+# Configure logger to ensure it outputs to console
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+if not logger.handlers:
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+# Suppress bcrypt version warnings
+warnings.filterwarnings('ignore', category=UserWarning, module='passlib.handlers.bcrypt')
 
 # Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -49,33 +62,66 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     Returns:
         True if password matches, False otherwise
     """
+    if not plain_password or not hashed_password:
+        logger.warning("Empty password or hash provided for verification")
+        return False
+    
+    # Log what we're trying to verify (for debugging)
+    logger.info(f"Verifying password - Hash format: {hashed_password[:10]}... (length: {len(hashed_password)})")
+    
+    # First try bcrypt (new format)
     try:
-        # First try bcrypt (new format)
-        if pwd_context.verify(plain_password, hashed_password):
+        # Suppress bcrypt version warnings during verification
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", UserWarning)
+            warnings.simplefilter("ignore", DeprecationWarning)
+            try:
+                logger.info(f"Attempting bcrypt verification...")
+                result = pwd_context.verify(plain_password, hashed_password)
+                logger.info(f"Bcrypt verify returned: {result}")
+            except Exception as verify_error:
+                # If verification raises an exception, log it but don't fail yet
+                logger.warning(f"Bcrypt verify raised exception: {verify_error}")
+                result = False
+        
+        if result:
+            logger.info("Password verified successfully using bcrypt")
             return True
-    except Exception:
-        pass
+        else:
+            logger.info("Bcrypt verification returned False, trying other methods...")
+    except Exception as e:
+        logger.warning(f"Bcrypt verification error (will try other methods): {e}")
     
     # If bcrypt fails, try scrypt format (legacy from Node.js)
     try:
         if '.' in hashed_password:
             # Scrypt format: hash.salt
             from passlib.hash import scrypt
-            return scrypt.verify(plain_password, hashed_password)
-    except Exception:
-        pass
+            result = scrypt.verify(plain_password, hashed_password)
+            if result:
+                logger.debug("Password verified successfully using scrypt")
+                return True
+    except Exception as e:
+        logger.debug(f"Scrypt verification error: {e}")
     
     # Try fallback hash (SHA-256)
     try:
         import hashlib
         fallback_hash = hashlib.sha256(plain_password.encode()).hexdigest()
         if fallback_hash == hashed_password:
+            logger.debug("Password verified successfully using SHA-256 fallback")
             return True
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"SHA-256 verification error: {e}")
     
-    # If all fail, try simple comparison for testing
-    return plain_password == hashed_password
+    # If all fail, try simple comparison for testing (only in debug mode)
+    if settings.debug and plain_password == hashed_password:
+        logger.warning("Password matched using plain text comparison (DEBUG MODE ONLY)")
+        return True
+    
+    logger.debug("All password verification methods failed")
+    return False
 
 
 def get_password_hash(password: str) -> str:

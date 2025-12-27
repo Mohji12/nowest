@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Home, Grid3x3, BookOpen, Phone } from 'lucide-react';
 import { useIsMobile, useIsTablet } from '@/hooks/use-mobile';
 import { useLocation } from 'wouter';
@@ -34,23 +35,56 @@ export default function FloatingNav({ activeItem = 'home', items = defaultItems 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navListRef = useRef<HTMLUListElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const touchHandledRef = useRef<boolean>(false);
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
   const [, setLocation] = useLocation();
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setOpenDropdown(null);
+    if (!openDropdown) return;
+
+    function handleClickOutside(event: MouseEvent | TouchEvent) {
+      const target = event.target as Node;
+      
+      // Don't close if clicking on the dropdown itself
+      if (dropdownRef.current && dropdownRef.current.contains(target)) {
+        return;
       }
+      
+      // Don't close if clicking on the button that opened the dropdown
+      const button = buttonRefs.current.get(openDropdown);
+      if (button && button.contains(target)) {
+        return;
+      }
+      
+      // Close the dropdown if clicking outside
+      setOpenDropdown(null);
     }
 
+    // Use a delay for touch events to prevent immediate closing on mobile
+    let touchTimeout: NodeJS.Timeout;
+    function handleTouchStart(event: TouchEvent) {
+      // Clear any existing timeout
+      if (touchTimeout) clearTimeout(touchTimeout);
+      
+      // Add a longer delay to allow the button click to process first
+      touchTimeout = setTimeout(() => {
+        handleClickOutside(event);
+      }, 500);
+    }
+
+    // Add both mouse and touch event listeners for better mobile support
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleTouchStart);
+      if (touchTimeout) clearTimeout(touchTimeout);
     };
-  }, []);
+  }, [openDropdown]);
 
   // Auto-scroll functionality for mobile
   useEffect(() => {
@@ -134,30 +168,130 @@ export default function FloatingNav({ activeItem = 'home', items = defaultItems 
     };
   }, [isMobile, isPaused]);
 
-  const handleItemClick = (item: NavItem) => {
-    if (item.subItems) {
+  const handleItemClick = (item: NavItem, event: React.MouseEvent | React.TouchEvent) => {
+    event.stopPropagation();
+    
+    if (item.subItems && item.subItems.length > 0) {
+      // Prevent default navigation for items with sub-items
+      event.preventDefault();
       // Toggle dropdown for items with sub-items
-      setOpenDropdown(openDropdown === item.id ? null : item.id);
+      const newState = openDropdown === item.id ? null : item.id;
+      setOpenDropdown(newState);
+      
+      // Calculate position for mobile dropdown - center it on the page
+      if (newState && isMobile) {
+        setDropdownPosition({
+          left: window.innerWidth / 2, // Center horizontally
+          top: window.innerHeight / 2, // Center vertically
+        });
+      } else {
+        setDropdownPosition(null);
+      }
     } else {
-      // Navigate directly for items without sub-items
+      // Navigate directly for items without sub-items (don't prevent default)
       setOpenDropdown(null);
+      setDropdownPosition(null);
       item.onClick?.();
     }
   };
 
-  const handleSubItemClick = (subItem: SubNavItem) => {
+  const handleSubItemClick = (subItem: SubNavItem, event: React.MouseEvent | React.TouchEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
     setOpenDropdown(null);
+    setDropdownPosition(null);
     subItem.onClick?.();
   };
 
+  // Render dropdown content
+  const renderDropdownContent = (
+    item: NavItem,
+    activeItem: string,
+    handleSubItemClick: (subItem: SubNavItem, event: React.MouseEvent | React.TouchEvent) => void,
+    isMobile: boolean,
+    isTablet: boolean
+  ) => (
+    <div className="relative">
+      {/* Backdrop blur container */}
+      <div className={`bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-2xl shadow-2xl ${
+        isMobile 
+          ? 'py-2 min-w-[160px] max-w-[85vw]' 
+          : isTablet 
+          ? 'py-2.5 min-w-[180px] max-w-[80vw]' 
+          : 'py-3 min-w-[200px]'
+      }`}
+      style={{
+        backgroundColor: 'white',
+        opacity: 1,
+        visibility: 'visible',
+      }}
+      >
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 rounded-2xl" />
+        
+        {/* Menu items */}
+        <div className="relative">
+          {item.subItems!.map((subItem) => (
+            <button
+              key={subItem.id}
+              onClick={(e) => handleSubItemClick(subItem, e)}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                handleSubItemClick(subItem, e);
+              }}
+              className={`w-full text-left font-medium transition-all duration-200 group relative overflow-hidden ${
+                activeItem === subItem.id 
+                  ? 'text-primary bg-primary/10' 
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+              } ${
+                isMobile 
+                  ? 'px-3 py-2 text-xs' 
+                  : isTablet 
+                  ? 'px-4 py-2.5 text-sm' 
+                  : 'px-5 py-3 text-sm'
+              }`}
+              data-testid={`button-nav-${subItem.id}`}
+            >
+              {/* Hover effect background */}
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+              
+              {/* Content */}
+              <span className="relative z-10 flex items-center gap-3">
+                {/* Icon indicator */}
+                <div className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                  activeItem === subItem.id 
+                    ? 'bg-primary scale-125' 
+                    : 'bg-muted-foreground/30 group-hover:bg-primary/60 group-hover:scale-110'
+                }`} />
+                {subItem.label}
+              </span>
+              
+              {/* Active indicator line */}
+              {activeItem === subItem.id && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+      
+      {/* Arrow pointer */}
+      <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
+        <div className="w-3 h-3 bg-white dark:bg-gray-800 border-r border-b border-gray-300 dark:border-gray-600 rotate-45 transform origin-center" />
+      </div>
+    </div>
+  );
+
   // Dynamic sizing based on device type
   const getNavbarClasses = () => {
+    // Remove overflow-hidden when dropdown is open to prevent clipping
+    const overflowClass = openDropdown ? "overflow-visible" : "overflow-hidden";
     if (isMobile) {
-      return "fixed bottom-2 left-1/2 -translate-x-1/2 z-50 backdrop-blur-xl bg-card/90 border border-card-border rounded-full py-3 shadow-lg max-w-[95vw] overflow-hidden";
+      return `fixed bottom-2 left-1/2 -translate-x-1/2 z-50 backdrop-blur-xl bg-card/90 border border-card-border rounded-full py-3 shadow-lg max-w-[95vw] ${overflowClass}`;
     } else if (isTablet) {
-      return "fixed bottom-2 left-1/2 -translate-x-1/2 z-50 backdrop-blur-xl bg-card/90 border border-card-border rounded-full px-6 py-2.5 shadow-lg max-w-[85vw]";
+      return `fixed bottom-2 left-1/2 -translate-x-1/2 z-50 backdrop-blur-xl bg-card/90 border border-card-border rounded-full px-6 py-2.5 shadow-lg max-w-[85vw] ${overflowClass}`;
     } else {
-      return "fixed bottom-4 left-1/2 -translate-x-1/2 z-50 backdrop-blur-xl bg-card/90 border border-card-border rounded-full px-8 py-3 shadow-lg";
+      return `fixed bottom-4 left-1/2 -translate-x-1/2 z-50 backdrop-blur-xl bg-card/90 border border-card-border rounded-full px-8 py-3 shadow-lg ${overflowClass}`;
     }
   };
 
@@ -180,18 +314,22 @@ export default function FloatingNav({ activeItem = 'home', items = defaultItems 
       <div 
         ref={scrollContainerRef}
         className={isMobile ? 'overflow-x-auto scrollbar-hide px-4' : ''}
+        style={openDropdown ? { overflow: 'visible' } : {}}
       >
         <ul 
           ref={navListRef}
           className={`${getGapClasses()} ${isMobile ? 'whitespace-nowrap' : ''}`}
-          style={isMobile ? {
-            scrollBehavior: 'auto',
-            WebkitOverflowScrolling: 'touch',
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            display: 'inline-flex',
-            width: 'max-content',
-          } : {}}
+          style={{
+            ...(isMobile ? {
+              scrollBehavior: 'auto',
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              display: 'inline-flex',
+              width: 'max-content',
+            } : {}),
+            overflow: openDropdown ? 'visible' : undefined,
+          }}
         >
         {items.map((item) => {
           const Icon = item.icon;
@@ -200,9 +338,36 @@ export default function FloatingNav({ activeItem = 'home', items = defaultItems 
           const isDropdownOpen = openDropdown === item.id;
 
           return (
-            <li key={item.id} className="relative">
+            <li key={item.id} className="relative" style={{ overflow: 'visible', zIndex: isDropdownOpen ? 100 : 'auto' }}>
               <button
-                onClick={() => handleItemClick(item)}
+                ref={(el) => {
+                  if (el && hasDropdown) {
+                    buttonRefs.current.set(item.id, el);
+                  } else {
+                    buttonRefs.current.delete(item.id);
+                  }
+                }}
+                onClick={(e) => {
+                  // Skip onClick if we already handled it via touch (on mobile)
+                  if (touchHandledRef.current && isMobile) {
+                    touchHandledRef.current = false;
+                    return;
+                  }
+                  handleItemClick(item, e);
+                }}
+                onTouchStart={(e) => {
+                  // Prevent the click outside handler from firing immediately
+                  e.stopPropagation();
+                  touchHandledRef.current = false;
+                }}
+                onTouchEnd={(e) => {
+                  if (hasDropdown) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    touchHandledRef.current = true;
+                    handleItemClick(item, e);
+                  }
+                }}
                 className={`flex flex-col items-center transition-all hover-elevate rounded-md ${
                   isActive ? 'text-primary' : 'text-muted-foreground'
                 } ${
@@ -230,78 +395,74 @@ export default function FloatingNav({ activeItem = 'home', items = defaultItems 
                 }`}>{item.label}</span>
               </button>
 
-              {/* Dropdown Menu */}
+              {/* Dropdown Menu - Use portal on mobile for better positioning */}
               {hasDropdown && isDropdownOpen && (
-                <div 
-                  ref={dropdownRef}
-                  className={`absolute bottom-full left-1/2 -translate-x-1/2 z-10 animate-in slide-in-from-bottom-2 duration-200 ${
-                    isMobile ? 'mb-2' : isTablet ? 'mb-2.5' : 'mb-3'
-                  }`}
-                >
-                  <div className="relative">
-                    {/* Backdrop blur container */}
-                    <div className={`bg-background/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl overflow-hidden ${
-                      isMobile 
-                        ? 'py-2 min-w-[140px] max-w-[85vw]' 
-                        : isTablet 
-                        ? 'py-2.5 min-w-[160px] max-w-[80vw]' 
-                        : 'py-3 min-w-[180px]'
-                    }`}>
-                      {/* Gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 rounded-2xl" />
-                      
-                      {/* Menu items */}
-                      <div className="relative">
-                        {item.subItems!.map((subItem, index) => (
-                          <button
-                            key={subItem.id}
-                            onClick={() => handleSubItemClick(subItem)}
-                            className={`w-full text-left font-medium transition-all duration-200 group relative overflow-hidden ${
-                              activeItem === subItem.id 
-                                ? 'text-primary bg-primary/10' 
-                                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                            } ${
-                              isMobile 
-                                ? 'px-3 py-2 text-xs' 
-                                : isTablet 
-                                ? 'px-4 py-2.5 text-sm' 
-                                : 'px-5 py-3 text-sm'
-                            }`}
-                            data-testid={`button-nav-${subItem.id}`}
-                            style={{ 
-                              animationDelay: `${index * 50}ms`,
-                              animation: 'slideInFromLeft 0.3s ease-out forwards'
-                            }}
-                          >
-                            {/* Hover effect background */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                            
-                            {/* Content */}
-                            <span className="relative z-10 flex items-center gap-3">
-                              {/* Icon indicator */}
-                              <div className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                                activeItem === subItem.id 
-                                  ? 'bg-primary scale-125' 
-                                  : 'bg-muted-foreground/30 group-hover:bg-primary/60 group-hover:scale-110'
-                              }`} />
-                              {subItem.label}
-                            </span>
-                            
-                            {/* Active indicator line */}
-                            {activeItem === subItem.id && (
-                              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
-                            )}
-                          </button>
-                        ))}
-                      </div>
+                <>
+                  {isMobile && dropdownPosition ? (
+                    createPortal(
+                      <>
+                        {/* Backdrop overlay */}
+                        <div
+                          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[99]"
+                          onClick={() => {
+                            setOpenDropdown(null);
+                            setDropdownPosition(null);
+                          }}
+                          onTouchStart={(e) => {
+                            e.stopPropagation();
+                            setOpenDropdown(null);
+                            setDropdownPosition(null);
+                          }}
+                        />
+                        {/* Centered dropdown */}
+                        <div 
+                          ref={dropdownRef}
+                          className="fixed z-[100]"
+                          style={{
+                            left: `${dropdownPosition.left}px`,
+                            top: `${dropdownPosition.top}px`,
+                            transform: 'translate(-50%, -50%)',
+                            pointerEvents: 'auto',
+                            WebkitTapHighlightColor: 'transparent',
+                            touchAction: 'manipulation',
+                            opacity: 1,
+                            visibility: 'visible',
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          onTouchStart={(e) => e.stopPropagation()}
+                          onTouchMove={(e) => e.stopPropagation()}
+                        >
+                          {renderDropdownContent(item, activeItem, handleSubItemClick, isMobile, isTablet)}
+                        </div>
+                      </>,
+                      document.body
+                    )
+                  ) : (
+                    <div 
+                      ref={dropdownRef}
+                      className={`absolute left-1/2 -translate-x-1/2 z-[100] ${
+                        isTablet 
+                          ? 'bottom-full mb-2.5' 
+                          : 'bottom-full mb-3'
+                      }`}
+                      onClick={(e) => e.stopPropagation()}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                      }}
+                      onTouchMove={(e) => e.stopPropagation()}
+                      style={{
+                        pointerEvents: 'auto',
+                        WebkitTapHighlightColor: 'transparent',
+                        touchAction: 'manipulation',
+                        opacity: 1,
+                        visibility: 'visible',
+                        display: 'block',
+                      }}
+                    >
+                      {renderDropdownContent(item, activeItem, handleSubItemClick, isMobile, isTablet)}
                     </div>
-                    
-                    {/* Arrow pointer */}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
-                      <div className="w-3 h-3 bg-background/95 backdrop-blur-xl border-r border-b border-border/50 rotate-45 transform origin-center" />
-                    </div>
-                  </div>
-                </div>
+                  )}
+                </>
               )}
             </li>
           );

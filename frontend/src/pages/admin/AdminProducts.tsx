@@ -32,40 +32,19 @@ export default function AdminProducts() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Type assertion for products array and process images
+  // Process products - backend already converts image URLs to full S3 URLs
   const productsArray = (products as any[]).map((product: any) => {
-    // Convert relative image paths to absolute S3 URLs
-    const getImageUrl = (imagePath: string) => {
-      if (!imagePath) return '/api/placeholder/400/300';
-      
-      // If it's already a full URL (S3 or any other), return as is
-      if (imagePath.startsWith('http')) {
-        return imagePath;
-      }
-      
-      // If it's a relative path, convert to S3 URL
-      if (imagePath.startsWith('/')) {
-        // Remove leading slash and construct S3 URL
-        const cleanPath = imagePath.substring(1);
-        const s3Url = `https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/attached_assets/${cleanPath}`;
-        return s3Url;
-      }
-      
-      // If it's a relative path without leading slash, add it
-      const s3Url = `https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/attached_assets/${imagePath}`;
-      return s3Url;
-    };
-
-    // Check multiple possible image field names and convert to S3 URL
-    const imageField = product.image_url || product.image || product.imageUrl || product.photo || product.photo_url;
-    const processedImageUrl = getImageUrl(imageField);
+    // Backend returns 'image' field (not 'image_url') and already converts to full S3 URL
+    const imageUrl = product.image || product.image_url || null;
+    
+    // Use placeholder if no image
+    const processedImageUrl = imageUrl || 'https://via.placeholder.com/400x300?text=No+Image';
 
     // Debug logging for image URLs
-    if (imageField) {
-      console.log(`Admin Product "${product.name}" image field:`, imageField);
-      console.log(`Converted to S3 URL:`, processedImageUrl);
+    if (imageUrl) {
+      console.log(`Admin Product "${product.name}" image URL:`, imageUrl);
     } else {
-      console.log(`Admin Product "${product.name}" has no image field, using placeholder`);
+      console.log(`Admin Product "${product.name}" has no image, using placeholder`);
     }
 
     return {
@@ -313,13 +292,15 @@ export default function AdminProducts() {
             <Card key={product.id} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
               <CardContent className="p-0">
                 {/* Product Image */}
-                <div className="aspect-[4/3] overflow-hidden rounded-t-lg">
+                <div className="aspect-[4/3] overflow-hidden rounded-t-lg bg-gray-100">
                   <img
                     src={product.processedImageUrl}
                     alt={product.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.currentTarget.src = '/api/placeholder/400/300';
+                      // Fallback to placeholder if image fails to load
+                      e.currentTarget.src = 'https://via.placeholder.com/400x300?text=No+Image';
+                      e.currentTarget.onerror = null; // Prevent infinite loop
                     }}
                   />
                 </div>

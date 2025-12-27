@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from sqlalchemy.orm import Session
 import logging
 import uuid
+import sys
 
 from database import get_db
 from services.admin_service import AdminService
@@ -14,7 +15,15 @@ from utils.auth import create_access_token, verify_token
 from middleware.auth import get_current_admin
 from config import settings
 
+# Configure logger to ensure it outputs to console
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+if not logger.handlers:
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 router = APIRouter(prefix="/api/admin", tags=["Admin Authentication"])
 
@@ -37,20 +46,44 @@ async def login(
     Raises:
         HTTPException: If authentication fails
     """
+    logger.info(f"=== LOGIN REQUEST START ===")
+    logger.info(f"Username: {admin_data.username}")
+    logger.info(f"Password length: {len(admin_data.password)}")
+    logger.info(f"Password value (first 3 chars): {admin_data.password[:3] if admin_data.password else 'None'}")
+    
     try:
+        logger.info(f"Login attempt for username: {admin_data.username}")
         admin_service = AdminService(db)
+        logger.info(f"AdminService created successfully")
         
         # Authenticate admin
-        admin = admin_service.authenticate_admin(
-            admin_data.username, 
-            admin_data.password
-        )
-        
-        if not admin:
+        try:
+            logger.info(f"Calling authenticate_admin for: {admin_data.username}")
+            logger.info(f"Password being sent: {admin_data.password[:3]}... (length: {len(admin_data.password)})")
+            admin = admin_service.authenticate_admin(
+                admin_data.username, 
+                admin_data.password
+            )
+            logger.info(f"authenticate_admin returned: {admin is not None}")
+            if admin:
+                logger.info(f"Admin returned: {admin.username}, ID: {admin.id}")
+            else:
+                logger.warning(f"Admin is None - authentication failed")
+        except Exception as auth_error:
+            logger.error(f"Authentication error for {admin_data.username}: {auth_error}", exc_info=True)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid username or password"
             )
+        
+        if not admin:
+            logger.warning(f"Authentication failed - admin is None for username: {admin_data.username}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid username or password"
+            )
+        
+        logger.info(f"Authentication successful for: {admin_data.username}")
         
         # Create JWT token
         access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)

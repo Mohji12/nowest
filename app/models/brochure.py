@@ -16,6 +16,7 @@ class Brochure(Base):
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=False)
     pdf_path = Column(String(500), nullable=False)
+    image = Column(String(500), nullable=True)  # Image URL for brochure card
     created_at = Column(DateTime, default=func.now(), nullable=False)
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
     

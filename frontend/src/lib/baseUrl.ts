@@ -1,6 +1,5 @@
 // Base URL Configuration
 // This file contains only the base URL for all API endpoints
-
 export const BASE_URL ='https://oljximoxqf.execute-api.ap-south-1.amazonaws.com';
 //export const BASE_URL = "http://127.0.0.1:8000"
 // Debug logging

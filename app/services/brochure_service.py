@@ -9,7 +9,7 @@ import logging
 
 from models.brochure import Brochure
 from schemas.brochure import BrochureCreate, BrochureUpdate
-from utils.s3_utils import convert_pdf_to_s3_url
+from utils.s3_utils import convert_pdf_to_s3_url, convert_image_to_s3_url
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +20,20 @@ class BrochureService:
     def __init__(self, db: Session):
         self.db = db
     
+    def _convert_brochure_image(self, brochure: Brochure) -> Brochure:
+        """
+        Convert brochure image path to full S3 URL if needed.
+        
+        Args:
+            brochure: Brochure object
+            
+        Returns:
+            Brochure with converted image URL
+        """
+        if brochure.image:
+            brochure.image = convert_image_to_s3_url(brochure.image)
+        return brochure
+    
     def get_all_brochures(self) -> List[Brochure]:
         """
         Get all brochures ordered by creation date.
@@ -28,7 +42,11 @@ class BrochureService:
             List of brochure objects
         """
         try:
-            return self.db.query(Brochure).order_by(desc(Brochure.created_at)).all()
+            brochures = self.db.query(Brochure).order_by(desc(Brochure.created_at)).all()
+            # Convert image paths to full S3 URLs
+            for brochure in brochures:
+                self._convert_brochure_image(brochure)
+            return brochures
         except Exception as e:
             logger.error(f"Error getting all brochures: {e}")
             raise HTTPException(
@@ -47,7 +65,10 @@ class BrochureService:
             Brochure object or None
         """
         try:
-            return self.db.query(Brochure).filter(Brochure.id == brochure_id).first()
+            brochure = self.db.query(Brochure).filter(Brochure.id == brochure_id).first()
+            if brochure:
+                self._convert_brochure_image(brochure)
+            return brochure
         except Exception as e:
             logger.error(f"Error getting brochure by ID {brochure_id}: {e}")
             raise HTTPException(
@@ -69,10 +90,16 @@ class BrochureService:
             # Convert PDF path to full S3 URL if needed
             pdf_url = convert_pdf_to_s3_url(brochure_data.pdf_path)
             
+            # Convert image path to full S3 URL if provided
+            image_url = None
+            if brochure_data.image:
+                image_url = convert_image_to_s3_url(brochure_data.image)
+            
             brochure = Brochure(
                 title=brochure_data.title,
                 description=brochure_data.description,
-                pdf_path=pdf_url
+                pdf_path=pdf_url,
+                image=image_url
             )
             
             self.db.add(brochure)
@@ -113,8 +140,20 @@ class BrochureService:
             if "pdf_path" in update_data and update_data["pdf_path"] is not None:
                 update_data["pdf_path"] = convert_pdf_to_s3_url(update_data["pdf_path"])
             
+            # Convert image path to full S3 URL if image is being updated
+            if "image" in update_data:
+                if update_data["image"] is not None and update_data["image"].strip():
+                    update_data["image"] = convert_image_to_s3_url(update_data["image"])
+                else:
+                    # Set to None if empty string
+                    update_data["image"] = None
+            
             for field, value in update_data.items():
-                setattr(brochure, field, value)
+                # Only set attribute if it exists in the model (handles missing DB column gracefully)
+                if hasattr(brochure, field):
+                    setattr(brochure, field, value)
+                else:
+                    logger.warning(f"Brochure model doesn't have field '{field}', skipping update")
             
             self.db.commit()
             self.db.refresh(brochure)
@@ -123,11 +162,13 @@ class BrochureService:
             return brochure
             
         except Exception as e:
-            logger.error(f"Error updating brochure: {e}")
+            logger.error(f"Error updating brochure: {e}", exc_info=True)
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
             self.db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Error updating brochure"
+                detail=f"Error updating brochure: {str(e)}"
             )
     
     def delete_brochure(self, brochure_id: str) -> bool:

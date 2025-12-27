@@ -24,26 +24,23 @@ export default function AdminLogin() {
 
     console.log('Login form submitted:', { username, password });
 
-    // Simulate a small delay for better UX
-    setTimeout(() => {
-      try {
-        const success = login(username, password);
-        console.log('Login result:', success);
-        
-        if (success) {
-          console.log('Login successful, redirecting to dashboard');
-          setLocation('/admin/dashboard');
-        } else {
-          console.log('Login failed, showing error');
-          setError('Invalid username or password. Please check your credentials.');
-        }
-      } catch (error) {
-        console.error('Login error:', error);
-        setError('An error occurred during login. Please try again.');
-      } finally {
-        setIsLoading(false);
+    try {
+      const success = await login(username, password);
+      console.log('Login result:', success);
+      
+      if (success) {
+        console.log('Login successful, redirecting to dashboard');
+        setLocation('/admin/dashboard');
+      } else {
+        console.log('Login failed, showing error');
+        setError('Invalid username or password. Please check your credentials.');
       }
-    }, 500);
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('An error occurred during login. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

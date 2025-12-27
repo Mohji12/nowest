@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Star } from 'lucide-react';
+import { Star, ArrowLeft } from 'lucide-react';
 import { ArrowRight } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 // Import actual images from attached_assets
 import consultingImg from '@assets/stock_images/professional_interio_c6db885a.jpg';
@@ -16,6 +17,7 @@ import trustpilotImg from '@assets/generated_images/trust.png';
 
 export default function About() {
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -38,6 +40,16 @@ export default function About() {
 
   return (
     <div>
+      {/* Back Button */}
+      <div className="fixed top-16 sm:top-20 left-2 sm:left-4 z-40">
+        <button
+          onClick={() => setLocation('/')}
+          className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-background/90 backdrop-blur-sm border border-border rounded-full shadow-lg hover:bg-muted transition-all duration-200 group"
+        >
+          <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover:-translate-x-1" />
+        </button>
+      </div>
+
       <section className="relative py-20 sm:py-24 md:py-28 px-3 sm:px-4 text-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-card/50 to-background" />
         
