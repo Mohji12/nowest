@@ -30,6 +30,8 @@ export default defineConfig({
       }
     },
     chunkSizeWarningLimit: 1000,
+    // Copy .htaccess and _redirects to dist folder
+    copyPublicDir: true,
   },
   server: {
     port: 5174,
