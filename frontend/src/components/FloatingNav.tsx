@@ -35,6 +35,7 @@ export default function FloatingNav({ activeItem = 'home', items = defaultItems 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navListRef = useRef<HTMLUListElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const navContainerRef = useRef<HTMLElement>(null);
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const touchHandledRef = useRef<boolean>(false);
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
@@ -86,85 +87,110 @@ export default function FloatingNav({ activeItem = 'home', items = defaultItems 
     };
   }, [openDropdown]);
 
-  // Auto-scroll functionality for mobile
+  // Auto-scroll functionality for mobile - continuous left to right scrolling
   useEffect(() => {
-    if (!isMobile || !scrollContainerRef.current || !navListRef.current) return;
+    if (!isMobile) return;
+    
+    let animationFrameId: number | null = null;
+    let startTimeout: NodeJS.Timeout | null = null;
+    let checkInterval: NodeJS.Timeout | null = null;
 
-    const scrollContainer = scrollContainerRef.current;
-    const navList = navListRef.current;
-    let animationFrameId: number;
-    let scrollPosition = 0;
-    const scrollSpeed = 0.3; // pixels per frame (slower for smoother effect)
-    let direction = 1; // 1 for right to left, -1 for left to right
-    let lastTime = performance.now();
+    const initScroll = () => {
+      if (!scrollContainerRef.current || !navListRef.current) {
+        return false;
+      }
 
-    const scroll = (currentTime: number) => {
-      if (isPaused) {
+      const scrollContainer = scrollContainerRef.current;
+      const navList = navListRef.current;
+      let scrollPosition = 0;
+      const scrollSpeed = 1.5; // Increased speed for more visible scrolling (pixels per frame)
+      let lastTime = performance.now();
+
+      // Debug logging
+      console.log('Scroll container initialized:', {
+        containerWidth: scrollContainer.clientWidth,
+        contentWidth: navList.scrollWidth,
+        maxScroll: navList.scrollWidth - scrollContainer.clientWidth
+      });
+
+      const scroll = (currentTime: number) => {
+        if (isPaused) {
+          lastTime = currentTime;
+          animationFrameId = requestAnimationFrame(scroll);
+          return;
+        }
+
+        const deltaTime = currentTime - lastTime;
         lastTime = currentTime;
+
+        // Calculate max scroll based on container width
+        const maxScroll = navList.scrollWidth - scrollContainer.clientWidth;
+        
+        if (maxScroll <= 0) {
+          // No need to scroll if content fits
+          animationFrameId = requestAnimationFrame(scroll);
+          return;
+        }
+
+        // Adjust scroll speed based on frame time for consistency
+        const adjustedSpeed = scrollSpeed * (deltaTime / 16.67); // Normalize to 60fps
+        scrollPosition += adjustedSpeed;
+
+        // Loop back to start when reaching the end (infinite scroll)
+        if (scrollPosition >= maxScroll) {
+          scrollPosition = 0; // Reset to start for continuous loop
+        }
+
+        scrollContainer.scrollLeft = scrollPosition;
         animationFrameId = requestAnimationFrame(scroll);
-        return;
-      }
+      };
 
-      const deltaTime = currentTime - lastTime;
-      lastTime = currentTime;
-
-      // Calculate max scroll based on container width
-      const maxScroll = navList.scrollWidth - scrollContainer.clientWidth;
-      
-      if (maxScroll <= 0) {
-        // No need to scroll if content fits
+      // Start scrolling immediately
+      startTimeout = setTimeout(() => {
         animationFrameId = requestAnimationFrame(scroll);
-        return;
-      }
+      }, 100);
 
-      // Adjust scroll speed based on frame time for consistency
-      const adjustedSpeed = scrollSpeed * (deltaTime / 16.67); // Normalize to 60fps
-      scrollPosition += adjustedSpeed * direction;
+      // Pause on hover/touch (shorter pause for better UX)
+      const handleMouseEnter = () => setIsPaused(true);
+      const handleMouseLeave = () => setIsPaused(false);
+      const handleTouchStart = () => setIsPaused(true);
+      const handleTouchEnd = () => {
+        setTimeout(() => setIsPaused(false), 1000); // Resume after 1 second
+      };
 
-      // Reverse direction when reaching edges with smooth transition
-      if (scrollPosition >= maxScroll) {
-        scrollPosition = maxScroll;
-        // Wait a bit before reversing
-        setTimeout(() => {
-          direction = -1;
-        }, 1000);
-      } else if (scrollPosition <= 0) {
-        scrollPosition = 0;
-        // Wait a bit before reversing
-        setTimeout(() => {
-          direction = 1;
-        }, 1000);
-      }
+      scrollContainer.addEventListener('mouseenter', handleMouseEnter);
+      scrollContainer.addEventListener('mouseleave', handleMouseLeave);
+      scrollContainer.addEventListener('touchstart', handleTouchStart);
+      scrollContainer.addEventListener('touchend', handleTouchEnd);
 
-      scrollContainer.scrollLeft = scrollPosition;
-      animationFrameId = requestAnimationFrame(scroll);
+      return () => {
+        if (startTimeout) clearTimeout(startTimeout);
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        scrollContainer.removeEventListener('mouseenter', handleMouseEnter);
+        scrollContainer.removeEventListener('mouseleave', handleMouseLeave);
+        scrollContainer.removeEventListener('touchstart', handleTouchStart);
+        scrollContainer.removeEventListener('touchend', handleTouchEnd);
+      };
     };
 
-    // Start scrolling after a short delay
-    const startTimeout = setTimeout(() => {
-      animationFrameId = requestAnimationFrame(scroll);
-    }, 500);
-
-    // Pause on hover/touch
-    const handleMouseEnter = () => setIsPaused(true);
-    const handleMouseLeave = () => setIsPaused(false);
-    const handleTouchStart = () => setIsPaused(true);
-    const handleTouchEnd = () => {
-      setTimeout(() => setIsPaused(false), 2000); // Resume after 2 seconds
-    };
-
-    scrollContainer.addEventListener('mouseenter', handleMouseEnter);
-    scrollContainer.addEventListener('mouseleave', handleMouseLeave);
-    scrollContainer.addEventListener('touchstart', handleTouchStart);
-    scrollContainer.addEventListener('touchend', handleTouchEnd);
+    // Try to initialize immediately
+    let cleanup = initScroll();
+    
+    // If refs aren't ready, check periodically
+    if (!cleanup) {
+      checkInterval = setInterval(() => {
+        cleanup = initScroll();
+        if (cleanup) {
+          clearInterval(checkInterval!);
+        }
+      }, 100);
+    }
 
     return () => {
-      clearTimeout(startTimeout);
-      cancelAnimationFrame(animationFrameId);
-      scrollContainer.removeEventListener('mouseenter', handleMouseEnter);
-      scrollContainer.removeEventListener('mouseleave', handleMouseLeave);
-      scrollContainer.removeEventListener('touchstart', handleTouchStart);
-      scrollContainer.removeEventListener('touchend', handleTouchEnd);
+      if (checkInterval) clearInterval(checkInterval);
+      if (cleanup) cleanup();
+      if (startTimeout) clearTimeout(startTimeout);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
   }, [isMobile, isPaused]);
 
@@ -307,38 +333,52 @@ export default function FloatingNav({ activeItem = 'home', items = defaultItems 
 
   return (
     <nav 
-      ref={scrollContainerRef}
+      ref={navContainerRef}
       className={getNavbarClasses()}
       data-testid="nav-floating"
     >
       <div 
         ref={scrollContainerRef}
-        className={isMobile ? 'overflow-x-auto scrollbar-hide px-4' : ''}
-        style={openDropdown ? { overflow: 'visible' } : {}}
+        className={isMobile ? 'overflow-x-auto scrollbar-hide' : ''}
+        style={{
+          ...(openDropdown ? { overflow: 'visible' } : {}),
+          ...(isMobile && !openDropdown ? { 
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            width: '100%',
+            maxWidth: '100%',
+            paddingLeft: '20px',
+            paddingRight: '20px',
+          } : {}),
+        }}
       >
         <ul 
           ref={navListRef}
           className={`${getGapClasses()} ${isMobile ? 'whitespace-nowrap' : ''}`}
           style={{
             ...(isMobile ? {
-              scrollBehavior: 'auto',
-              WebkitOverflowScrolling: 'touch',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
               display: 'inline-flex',
               width: 'max-content',
+              minWidth: '300%', // Make it much wider than container to ensure scrolling
+              flexShrink: 0,
+              paddingRight: '50px', // Add extra padding for smooth loop
             } : {}),
             overflow: openDropdown ? 'visible' : undefined,
           }}
         >
-        {items.map((item) => {
+        {/* Duplicate items multiple times for seamless infinite scroll on mobile */}
+        {(isMobile ? [...items, ...items, ...items] : items).map((item, index) => {
+          const uniqueKey = isMobile ? `${item.id}-${index}` : item.id;
           const Icon = item.icon;
           const isActive = activeItem === item.id || (item.subItems && item.subItems.some(sub => activeItem === sub.id));
           const hasDropdown = item.subItems && item.subItems.length > 0;
           const isDropdownOpen = openDropdown === item.id;
 
           return (
-            <li key={item.id} className="relative" style={{ overflow: 'visible', zIndex: isDropdownOpen ? 100 : 'auto' }}>
+            <li key={uniqueKey} className="relative" style={{ overflow: 'visible', zIndex: isDropdownOpen ? 100 : 'auto' }}>
               <button
                 ref={(el) => {
                   if (el && hasDropdown) {

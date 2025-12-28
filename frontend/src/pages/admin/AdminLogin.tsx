@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -14,8 +14,16 @@ export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('User already authenticated, redirecting to dashboard');
+      setLocation('/admin/dashboard');
+    }
+  }, [isAuthenticated, setLocation]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,16 +37,20 @@ export default function AdminLogin() {
       console.log('Login result:', success);
       
       if (success) {
-        console.log('Login successful, redirecting to dashboard');
-        setLocation('/admin/dashboard');
+        console.log('Login successful, waiting for state update before redirect');
+        // Wait a moment for state to update, then redirect
+        setTimeout(() => {
+          console.log('Redirecting to dashboard');
+          setLocation('/admin/dashboard');
+        }, 100);
       } else {
         console.log('Login failed, showing error');
         setError('Invalid username or password. Please check your credentials.');
+        setIsLoading(false);
       }
     } catch (error) {
       console.error('Login error:', error);
       setError('An error occurred during login. Please try again.');
-    } finally {
       setIsLoading(false);
     }
   };

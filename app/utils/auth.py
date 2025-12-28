@@ -115,9 +115,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     except Exception as e:
         logger.debug(f"SHA-256 verification error: {e}")
     
-    # If all fail, try simple comparison for testing (only in debug mode)
-    if settings.debug and plain_password == hashed_password:
-        logger.warning("Password matched using plain text comparison (DEBUG MODE ONLY)")
+    # If all fail, try simple plain text comparison (for plain text passwords)
+    if plain_password == hashed_password:
+        logger.warning("Password matched using plain text comparison (PLAIN TEXT MODE)")
         return True
     
     logger.debug("All password verification methods failed")

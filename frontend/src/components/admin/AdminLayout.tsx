@@ -10,7 +10,12 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [location, setLocation] = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout: logoutAuth } = useAuth();
+  
+  const handleLogout = () => {
+    logoutAuth();
+    setLocation('/admin/login');
+  };
 
   const menuItems = [
     { title: "Dashboard", icon: LayoutDashboard, path: "/admin/dashboard" },
@@ -84,14 +89,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               variant="outline"
               size="sm"
               className="w-full text-xs sm:text-sm border-gray-300 text-gray-700 hover:bg-gray-50"
-              onClick={() => {
-                setLocation("/");
-              }}
+              onClick={handleLogout}
               data-testid="button-logout"
             >
               <LogOut className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Back to Site</span>
-              <span className="sm:hidden">Back</span>
+              <span className="hidden sm:inline">Logout</span>
+              <span className="sm:hidden">Logout</span>
             </Button>
           </div>
         </Sidebar>

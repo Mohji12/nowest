@@ -77,6 +77,7 @@ import AdminLeads from "@/pages/admin/AdminLeads";
 import AdminSEO from "@/pages/admin/AdminSEO";
 import AdminAnalytics from "@/pages/admin/AdminAnalytics";
 import AdminLayout from "@/components/admin/AdminLayout";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -192,60 +193,63 @@ function Router() {
                 <Route path="/api-test" component={APITest} />
                 <Route path="/portfolio-test" component={PortfolioTest} />
         <Route path="/admin/login">
-          {() => {
-            const [, setLocation] = useLocation();
-            useEffect(() => {
-              setLocation('/admin/dashboard');
-            }, [setLocation]);
-            return (
-              <div className="h-screen w-full flex items-center justify-center">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground mx-auto mb-4"></div>
-                  <p className="text-muted-foreground">Redirecting to dashboard...</p>
-                </div>
-              </div>
-            );
-          }}
+          <AdminLogin />
         </Route>
         <Route path="/admin">
-          <AdminLayout>
-            <AdminDashboard />
-          </AdminLayout>
+          <ProtectedRoute>
+            <AdminLayout>
+              <AdminDashboard />
+            </AdminLayout>
+          </ProtectedRoute>
         </Route>
         <Route path="/admin/dashboard">
-          <AdminLayout>
-            <AdminDashboard />
-          </AdminLayout>
+          <ProtectedRoute>
+            <AdminLayout>
+              <AdminDashboard />
+            </AdminLayout>
+          </ProtectedRoute>
         </Route>
         <Route path="/admin/products">
-          <AdminLayout>
-            <AdminProducts />
-          </AdminLayout>
+          <ProtectedRoute>
+            <AdminLayout>
+              <AdminProducts />
+            </AdminLayout>
+          </ProtectedRoute>
         </Route>
         <Route path="/admin/portfolio">
-          <AdminLayout>
-            <AdminPortfolio />
-          </AdminLayout>
+          <ProtectedRoute>
+            <AdminLayout>
+              <AdminPortfolio />
+            </AdminLayout>
+          </ProtectedRoute>
         </Route>
         <Route path="/admin/brochures">
-          <AdminLayout>
-            <AdminBrochures />
-          </AdminLayout>
+          <ProtectedRoute>
+            <AdminLayout>
+              <AdminBrochures />
+            </AdminLayout>
+          </ProtectedRoute>
         </Route>
         <Route path="/admin/leads">
-          <AdminLayout>
-            <AdminLeads />
-          </AdminLayout>
+          <ProtectedRoute>
+            <AdminLayout>
+              <AdminLeads />
+            </AdminLayout>
+          </ProtectedRoute>
         </Route>
         <Route path="/admin/seo">
-          <AdminLayout>
-            <AdminSEO />
-          </AdminLayout>
+          <ProtectedRoute>
+            <AdminLayout>
+              <AdminSEO />
+            </AdminLayout>
+          </ProtectedRoute>
         </Route>
         <Route path="/admin/analytics">
-          <AdminLayout>
-            <AdminAnalytics />
-          </AdminLayout>
+          <ProtectedRoute>
+            <AdminLayout>
+              <AdminAnalytics />
+            </AdminLayout>
+          </ProtectedRoute>
         </Route>
         <Route component={NotFound} />
       </Switch>

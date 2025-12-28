@@ -195,7 +195,7 @@ export default function Home() {
             <Button
               size="lg"
               variant="outline"
-              onClick={() => console.log('Book consultation')}
+              onClick={() => setLocation('/contact')}
               className="group w-full sm:w-auto"
               data-testid="button-book-consultation"
             >
