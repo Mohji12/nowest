@@ -50,14 +50,13 @@ app = FastAPI(
     },
 )
 
-# CORS middleware - Enabled for local development
-# Note: For Lambda deployment, you may want to configure CORS at the Lambda Function URL level instead
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins including all ports
+    allow_origins=["*"] if settings.debug else settings.allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all HTTP methods including OPTIONS
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=settings.allowed_methods if not settings.debug else ["*"],
+    allow_headers=settings.allowed_headers if not settings.debug else ["*"],
 )
 
 # Include API routers
@@ -129,5 +128,12 @@ handler = Mangum(app)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+    uvicorn.run(
+        "main:app",
+        host=settings.host,
+        port=settings.port,
+        reload=settings.debug,
+        workers=1 if settings.debug else settings.workers,
+    )
     

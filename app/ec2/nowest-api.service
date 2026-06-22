@@ -1,0 +1,16 @@
+[Unit]
+Description=Nowest Interior FastAPI API
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/nowest/app
+EnvironmentFile=/opt/nowest/app/.env
+ExecStart=/opt/nowest/app/.venv/bin/gunicorn main:app -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 --workers 2 --timeout 120
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

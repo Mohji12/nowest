@@ -50,6 +50,7 @@ env/
 # Misc
 *.local
 .turbo
+s3_downloads/
 
 # Large zip files
 *.zip

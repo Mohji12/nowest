@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://oljximoxqf.execute-api.ap-south-1.amazonaws.com/api/$1"
+      "destination": "https://nowest.krintixsample.site/api/$1"
     },
     {
       "source": "/(.*)",

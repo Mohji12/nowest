@@ -26,6 +26,10 @@ env/
 ENV/
 env.bak/
 venv.bak/
+nowest/
+
+# Local downloads / large assets
+s3_downloads/
 
 # IDE
 .vscode/
