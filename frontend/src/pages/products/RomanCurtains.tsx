@@ -1,12 +1,16 @@
 import ProductDetailLayout from '@/components/ProductDetailLayout';
 
+const ROMAN_CURTAINS_BASE =
+  'https://nowest.s3.ap-south-1.amazonaws.com/collection/roman+curtains'; 
+
 // S3 Images from Nowest_Image folder
 const ROMAN_CURTAINS_S3_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Allusion-Landscape-size-Shadow_Sand_Liv_Blue_walls_Open.jpg.webp',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Allusion-Landscape-size-Shadow_Stone_Liv_Green_Walls_Open.jpg.webp',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/strata-curtain.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Ella-Tilla-2.jpg',
+  `${ROMAN_CURTAINS_BASE}/Create_a_photorealistic_image_of_202606220801.jpeg `,
+  `${ROMAN_CURTAINS_BASE}/ChatGPT Image Jun 22, 2026, 08_00_56 AM.png `,
+  `${ROMAN_CURTAINS_BASE}/ChatGPT Image Jun 22, 2026, 08_01_25 AM.png `,
 ];
+
+const ROMAN_CURTAINS_HERO_IMAGE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/roman+curtains/ChatGPT+Image+Jun+22%2C+2026%2C+08_01_02+AM.png';
 
 export default function RomanCurtains() {
   return (
@@ -24,7 +28,7 @@ export default function RomanCurtains() {
         'Blackout options',
         'Ideal for bedrooms'
       ]}
-      heroImage={ROMAN_CURTAINS_S3_IMAGES[0]}
+      heroImage={ROMAN_CURTAINS_HERO_IMAGE}
       images={ROMAN_CURTAINS_S3_IMAGES}
     />
   );

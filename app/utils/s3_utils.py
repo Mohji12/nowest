@@ -11,7 +11,84 @@ S3_BUCKET_NAME = "jgi-menteetracker"
 S3_REGION = "ap-south-1"
 S3_BASE_URL = f"https://{S3_BUCKET_NAME}.s3.{S3_REGION}.amazonaws.com"
 
-def convert_to_full_s3_url(image_path: Optional[str], asset_type: str = "attached_assets") -> Optional[str]:
+NOWEST_S3_BUCKET_NAME = "nowest"
+NOWEST_S3_BASE_URL = f"https://{NOWEST_S3_BUCKET_NAME}.s3.{S3_REGION}.amazonaws.com"
+PORTFOLIO_S3_FOLDER = "collection"
+
+LEGACY_BUCKET_HOSTS = (
+    f"{S3_BUCKET_NAME}.s3.{S3_REGION}.amazonaws.com",
+    f"{S3_BUCKET_NAME}s.s3.{S3_REGION}.amazonaws.com",
+)
+
+
+def _extract_filename(path: str) -> str:
+    return path.split("?")[0].rstrip("/").split("/")[-1]
+
+
+_collection_file_map: dict[str, str] | None = None
+
+
+def get_collection_file_map() -> dict[str, str]:
+    """Load filename -> S3 key map for the nowest collection folder."""
+    global _collection_file_map
+    if _collection_file_map is not None:
+        return _collection_file_map
+
+    file_map: dict[str, str] = {}
+    try:
+        import boto3
+
+        s3_client = boto3.client("s3", region_name=S3_REGION)
+        paginator = s3_client.get_paginator("list_objects_v2")
+        prefix = f"{PORTFOLIO_S3_FOLDER}/"
+
+        for page in paginator.paginate(Bucket=NOWEST_S3_BUCKET_NAME, Prefix=prefix):
+            for obj in page.get("Contents", []):
+                key = obj["Key"]
+                if key.endswith("/"):
+                    continue
+                file_map[key.split("/")[-1]] = key
+
+        logger.info("Loaded %s portfolio images from nowest/%s", len(file_map), PORTFOLIO_S3_FOLDER)
+    except Exception as exc:
+        logger.warning("Could not load nowest collection file map: %s", exc)
+
+    _collection_file_map = file_map
+    return file_map
+
+
+def resolve_portfolio_image_url(image_path: Optional[str]) -> Optional[str]:
+    """Resolve any portfolio image path/URL to the correct nowest S3 URL."""
+    if not image_path:
+        return None
+
+    filename = _extract_filename(image_path)
+    file_map = get_collection_file_map()
+
+    if filename in file_map:
+        return f"{NOWEST_S3_BASE_URL}/{file_map[filename]}"
+
+    if image_path.startswith("http"):
+        return image_path
+
+    clean_path = image_path[1:] if image_path.startswith("/") else image_path
+    if clean_path.startswith(f"{PORTFOLIO_S3_FOLDER}/"):
+        clean_path = clean_path[len(f"{PORTFOLIO_S3_FOLDER}/") :]
+
+    return f"{NOWEST_S3_BASE_URL}/{PORTFOLIO_S3_FOLDER}/{clean_path}"
+
+
+def rewrite_legacy_portfolio_url(url: str) -> str:
+    """Rewrite portfolio image URLs to the correct nowest/collection path."""
+    resolved = resolve_portfolio_image_url(url)
+    return resolved or url
+
+def convert_to_full_s3_url(
+    image_path: Optional[str],
+    asset_type: str = "attached_assets",
+    *,
+    bucket_base_url: Optional[str] = None,
+) -> Optional[str]:
     """
     Convert relative image paths to full S3 URLs.
     
@@ -41,11 +118,17 @@ def convert_to_full_s3_url(image_path: Optional[str], asset_type: str = "attache
     if clean_path.startswith(f"{asset_type}/"):
         clean_path = clean_path[len(f"{asset_type}/"):]
     
-    # Construct full S3 URL
-    full_url = f"{S3_BASE_URL}/{asset_type}/{clean_path}"
+    base_url = bucket_base_url or S3_BASE_URL
+    full_url = f"{base_url}/{asset_type}/{clean_path}"
     logger.debug(f"Converted relative path to S3 URL: {image_path} -> {full_url}")
     
     return full_url
+
+def convert_portfolio_image_to_s3_url(image_path: Optional[str]) -> Optional[str]:
+    """
+    Convert portfolio image path to full S3 URL in the nowest/collection bucket.
+    """
+    return resolve_portfolio_image_url(image_path)
 
 def convert_image_to_s3_url(image_path: Optional[str]) -> Optional[str]:
     """

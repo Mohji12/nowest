@@ -1,10 +1,16 @@
 import ProductDetailLayout from '@/components/ProductDetailLayout';
 
 // S3 Images from Nowest_Image folder
-const SHEER_ROLLER_BLINDS_S3_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape_Petal_White_Liv-1024x731.jpg.webp',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/voile-780x780.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape_Roller_Kaleidoscope-Colour_BO_Kids-1024x731.jpg.webp',
+const Sheer_blind_roller =
+  'https://nowest.s3.ap-south-1.amazonaws.com/collection/Sheer+Roller+Blinds';
+
+const SHEER_HERO_IMAGE =
+  `${Sheer_blind_roller}/An_ultra-detailed_macro_product_photography_202606220312.jpeg`;
+
+const SHEER_S3_IMAGES = [
+  `${Sheer_blind_roller}/A_single_ultra-realistic_luxury_interior_202606220253.jpeg`,
+  `${Sheer_blind_roller}/An_ultra-realistic_cinematic_interior_photograph_202606220255.jpeg`,
+  `${Sheer_blind_roller}/ChatGPT+Image+Jun+22%2C+2026%2C+02_53_57+AM.png`,
 ];
 
 export default function SheerRollerBlinds() {
@@ -23,8 +29,8 @@ export default function SheerRollerBlinds() {
         'Perfect for living rooms and bedrooms',
         'Maintains room brightness'
       ]}
-      heroImage={SHEER_ROLLER_BLINDS_S3_IMAGES[0]}
-      images={SHEER_ROLLER_BLINDS_S3_IMAGES}
+      heroImage={SHEER_HERO_IMAGE}
+      images={SHEER_S3_IMAGES}
     />
   );
 }

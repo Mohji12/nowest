@@ -1,12 +1,15 @@
 import ProductDetailLayout from '@/components/ProductDetailLayout';
 
+const CUSHIONS_BASE =
+  'https://nowest.s3.ap-south-1.amazonaws.com/collection/cushions';
 // S3 Images from Nowest_Image folder
 const CUSHIONS_S3_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/belle-peony-300x300.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/calista-mineral-300x300.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/cielo-amethyst-1-300x300.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/flores-mineral-2-1-300x300.jpg',
+  `${CUSHIONS_BASE}/ChatGPT Image Jun 22, 2026, 08_22_19 AM.png `,
+  `${CUSHIONS_BASE}/ChatGPT Image Jun 22, 2026, 08_23_33 AM.png `,
+  `${CUSHIONS_BASE}/An_ultra-realistic_premium_product_photography_202606220821.jpeg `,
 ];
+
+const CUSHIONS_HERO_IMAGE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/cushions/ChatGPT+Image+Jun+22%2C+2026%2C+08_22_03+AM.png';
 
 export default function Cushions() {
   return (
@@ -24,7 +27,7 @@ export default function Cushions() {
         '40cm x 40cm standard',
         'Custom sizes available'
       ]}
-      heroImage={CUSHIONS_S3_IMAGES[0]}
+      heroImage={CUSHIONS_HERO_IMAGE}
       images={CUSHIONS_S3_IMAGES}
     />
   );

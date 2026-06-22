@@ -1,12 +1,34 @@
 import ProductDetailLayout from '@/components/ProductDetailLayout';
 
+const SECURITY_GRILLES_BASE =
+  'https://nowest.s3.ap-south-1.amazonaws.com/collection/security+grilles';
+
 // S3 Images from Nowest_Image folder
 const SECURITY_GRILLES_S3_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/kelso-with-70mm-fascia-profile-in-black.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/sephora-sand-with-white-back-bar-1.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/IMG_0158-1920x1080.jpeg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/IMG_0165-rotated.jpeg',
+  `${SECURITY_GRILLES_BASE}/
+Name
+	
+Folder
+	
+Type
+	
+Size
+	
+Status
+	
+Error
+
+ChatGPT Image Jun 22, 2026, 06_26_28 AM.png 
+-
+image/png
+2.0 MB
+Succeeded
+-
+Generate_a_detailed_industrial_scene_202606220624.jpeg`,
+  `${SECURITY_GRILLES_BASE}/ChatGPT Image Jun 22, 2026, 06_26_02 AM.png`,
+  `${SECURITY_GRILLES_BASE}/ChatGPT+Image+Jun+22%2C+2026%2C+06_24_20+AM.png`,
 ];
+const SECURITY_GRILLES_HERO_IMAGE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/security+grilles/ChatGPT+Image+Jun+22%2C+2026%2C+06_26_28+AM.png';
 
 export default function SecurityGrilles() {
   return (
@@ -24,7 +46,7 @@ export default function SecurityGrilles() {
         'Easy operation',
         'Ideal for commercial use'
       ]}
-      heroImage={SECURITY_GRILLES_S3_IMAGES[0]}
+      heroImage={SECURITY_GRILLES_HERO_IMAGE}
       images={SECURITY_GRILLES_S3_IMAGES}
     />
   );

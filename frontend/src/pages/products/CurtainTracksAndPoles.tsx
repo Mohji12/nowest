@@ -1,12 +1,15 @@
 import ProductDetailLayout from '@/components/ProductDetailLayout';
 
+const CURTAIN_TRACKS_POLES_BASE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/curtain+tracks+and+poles';
+
 // S3 Images from Nowest_Image folder
 const CURTAIN_TRACKS_POLES_S3_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/kelso-with-70mm-fascia-profile-in-black.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/sephora-sand-with-white-back-bar-1.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/IMG_0158-1920x1080.jpeg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/IMG_0165-rotated.jpeg',
+  `${CURTAIN_TRACKS_POLES_BASE}/ChatGPT Image Jun 22, 2026, 09_00_37 PM.png `,
+  `${CURTAIN_TRACKS_POLES_BASE}/ChatGPT Image Jun 22, 2026, 09_00_46 PM.png `,
+  `${CURTAIN_TRACKS_POLES_BASE}/Premium_product_and_interior_styling_202606222102.jpeg `,
 ];
+
+const CURTAIN_TRACKS_POLES_HERO_IMAGE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/curtain+tracks+and+poles/ChatGPT+Image+Jun+22%2C+2026%2C+09_04_12+PM.png'
 
 export default function CurtainTracksAndPoles() {
   return (
@@ -24,7 +27,7 @@ export default function CurtainTracksAndPoles() {
         'Heavy-duty options',
         'Motorised available'
       ]}
-      heroImage={CURTAIN_TRACKS_POLES_S3_IMAGES[0]}
+      heroImage={CURTAIN_TRACKS_POLES_HERO_IMAGE}
       images={CURTAIN_TRACKS_POLES_S3_IMAGES}
     />
   );

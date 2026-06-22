@@ -11,8 +11,12 @@ import motorizedBlindsImg from '@assets/stock_images/motorized_automated__4b820a
 import cellularBlindsImg from '@assets/stock_images/pleated_honeycomb_bl_2663b2e3.jpg';
 
 // S3 URLs
-const MOTORIZED_BLINDS_S3_URL = 'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/attached_assets/stock_images/motorized_automated__978f737d.jpg';
-const PLEATED_PANEL_BLINDS_S3_URL = 'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/attached_assets/stock_images/panel_blinds_sliding_0c1c0c07.jpg';
+const CONSERVATORY_BLINDS_BASE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/conservatory+blinds';
+const CONSERVATORY_BLINDS_S3_IMAGES = [
+  `${CONSERVATORY_BLINDS_BASE}/A_spacious_and_airy_Edwardian_202606220345.jpeg`,
+  `${CONSERVATORY_BLINDS_BASE}/ChatGPT+Image+Jun+22%2C+2026%2C+03_45_18+AM.png`,
+  `${CONSERVATORY_BLINDS_BASE}/ChatGPT+Image+Jun+22%2C+2026%2C+03_46_51+AM.png`,
+];
 
 // Portfolio images from S3 Nowest_Image folder - distributed across product types
 const PORTFOLIO_IMAGES = [
@@ -173,16 +177,16 @@ const productTypesData: Record<string, {
   'conservatory-blinds': {
     name: 'Conservatory Blinds',
     description: 'Specialized blinds designed for conservatories and sunrooms.',
-    longDescription: 'Conservatory blinds are specifically designed to handle the unique challenges of conservatories and sunrooms. They help control temperature, reduce glare, and provide privacy while maintaining the bright, airy feel of these spaces. Available in various styles and materials, conservatory blinds can be fitted to roof windows, side windows, and doors.',
+    longDescription: 'Conservatory blinds are specifically designed to handle the unique challenges of conservatories and sunrooms. They help control temperature, reduce glare, and provide privacy while maintaining the bright, airy feel of these spaces. Made-to-measure blinds that control light and heat while enhancing style. Perfect Fit® options provide child-safe, gap-free installation ideal for uPVC windows.',
     features: [
       'Temperature control',
       'Glare reduction',
       'UV protection',
       'Fits roof and side windows',
-      'Maintains natural light',
+      'Perfect Fit® options available',
     ],
-    images: getProductImages(19, 4),
-    mainImage: getProductImages(19, 1)[0],
+    images: CONSERVATORY_BLINDS_S3_IMAGES,
+    mainImage: CONSERVATORY_BLINDS_S3_IMAGES[0],
   },
   'motorised-blinds': {
     name: 'Motorised Blinds',

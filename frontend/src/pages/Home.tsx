@@ -8,6 +8,14 @@ const heroImage = '/assets/WhatsApp Image 2025-12-03 at 15.34.24_06ffa5f6.jpg';
 const dramaticImage = '/assets/stock_images/luxury_curtains_flow_9cf016a6.jpg';
 const whatsappImage = '/assets/WhatsApp Image 2025-12-03 at 15.34.24_06ffa5f6.jpg';
 
+// Room preview images from nowest S3 collection
+const ROOM_IMAGES = {
+  kitchen: 'https://nowest.s3.ap-south-1.amazonaws.com/collection/kitchen/A_bright_cheerful_kitchen_with_202606230239.jpeg',
+  bathroom: 'https://nowest.s3.ap-south-1.amazonaws.com/collection/A_bright_family_bathroom_with_202606230251.jpeg',
+  bedroom: 'https://nowest.s3.ap-south-1.amazonaws.com/collection/bedroom/A_bold_modern_maximalist_bedroom_202606230317.jpeg',
+  livingRoom: 'https://nowest.s3.ap-south-1.amazonaws.com/collection/living+room/A_bright_contemporary_living_room_202606230333.jpeg',
+};
+
 export default function Home() {
   const [, setLocation] = useLocation();
 
@@ -83,7 +91,7 @@ export default function Home() {
                 <div className="relative overflow-hidden rounded-t-[50%] rounded-b-lg mb-3 shadow-md hover:shadow-xl transition-shadow duration-300">
                   <div className="aspect-[3/4] w-full">
                     <img
-                      src="https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Portrait_Kitchen_Perfect_Fit_NG_Roller_Bubbles_White.jpg.webp"
+                      src={ROOM_IMAGES.kitchen}
                       alt="Kitchen"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
@@ -106,7 +114,7 @@ export default function Home() {
                 <div className="relative overflow-hidden rounded-t-[50%] rounded-b-lg mb-3 shadow-md hover:shadow-xl transition-shadow duration-300">
                   <div className="aspect-[3/4] w-full">
                     <img
-                      src="https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Roll-Portrait-size-Azalea-Pink_BO_Bath.jpg.webp"
+                      src={ROOM_IMAGES.bathroom}
                       alt="Bathroom"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
@@ -129,7 +137,7 @@ export default function Home() {
                 <div className="relative overflow-hidden rounded-t-[50%] rounded-b-lg mb-3 shadow-md hover:shadow-xl transition-shadow duration-300">
                   <div className="aspect-[3/4] w-full">
                     <img
-                      src="https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Vert-Landscape-size-Petal-Terracotta_Bed_Main.jpg.webp"
+                      src={ROOM_IMAGES.bedroom}
                       alt="Bedroom"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
@@ -152,7 +160,7 @@ export default function Home() {
                 <div className="relative overflow-hidden rounded-t-[50%] rounded-b-lg mb-3 shadow-md hover:shadow-xl transition-shadow duration-300">
                   <div className="aspect-[3/4] w-full">
                     <img
-                      src="https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape_Petal_White_Liv-1024x731.jpg.webp"
+                      src={ROOM_IMAGES.livingRoom}
                       alt="Living Room"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {

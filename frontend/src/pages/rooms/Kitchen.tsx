@@ -1,17 +1,17 @@
 import RoomDetailLayout from '@/components/RoomDetailLayout';
 
-// S3 Images from Nowest_Image folder - Kitchen related images ONLY
-// All images should be specifically related to kitchen/dining areas
+const KITCHEN_BASE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/kitchen';
+
 const KITCHEN_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Portrait_Kitchen_Perfect_Fit_NG_Roller_Bubbles_White.jpg.webp', // Kitchen specific
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape-size-Birdsong-Colour-Crush_Kit.jpg.webp', // Kit = Kitchen
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Roll-Portrait-size-Didsbury-Navy_BO_Dine.jpg.webp', // Dine = Dining/Kitchen
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/PFNG-Image.jpg.webp', // Perfect Fit - Kitchen suitable
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape-PF3.jpg.webp', // Perfect Fit - Kitchen suitable
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Ella-Tilla-2.jpg', // Kitchen suitable fabric
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Flock-Melody-2-780x780.jpg', // Kitchen suitable fabric
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Flores-Biscuit.jpg', // Kitchen suitable fabric
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Mythic-Ecru.jpg', // Kitchen suitable fabric
+  `${KITCHEN_BASE}/A_bright_cheerful_kitchen_with_202606230239.jpeg`,
+  `${KITCHEN_BASE}/A_Scandinavian-style_kitchen_with_minimalist_202606230234.jpeg`,
+  `${KITCHEN_BASE}/A_bright_modern_kitchen_with_202606230233.jpeg`,
+  `${KITCHEN_BASE}/A_colourful_family_kitchen_with_202606230238.jpeg`,
+  `${KITCHEN_BASE}/A_cosy_farmhouse_kitchen_with_202606230233.jpeg`,
+  `${KITCHEN_BASE}/A_rustic_kitchen_with_exposed_202606230239.jpeg`,
+  `${KITCHEN_BASE}/A_sleek_contemporary_kitchen_with_202606230233.jpeg`,
+  `${KITCHEN_BASE}/A_sophisticated_kitchen_with_gold_202606230239.jpeg`,
+  `${KITCHEN_BASE}/ChatGPT+Image+Jun+23%2C+2026%2C+02_41_53+AM.png`,
 ];
 
 export default function Kitchen() {
@@ -28,10 +28,3 @@ export default function Kitchen() {
     />
   );
 }
-
-
-
-
-
-
-

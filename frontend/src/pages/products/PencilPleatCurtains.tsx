@@ -1,12 +1,16 @@
 import ProductDetailLayout from '@/components/ProductDetailLayout';
 
+const PENCIL_PLEAT_CURTAINS_BASE =
+  'https://nowest.s3.ap-south-1.amazonaws.com/collection/pencil+pleat+curtains';
+
 // S3 Images from Nowest_Image folder
 const PENCIL_PLEAT_CURTAINS_S3_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/strata-curtain.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Ella-Tilla-2.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Flock-Melody-2-780x780.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Flores-Biscuit.jpg',
+  `${PENCIL_PLEAT_CURTAINS_BASE}/Generate_a_high-resolution_image_of_202606220651.jpeg 
+`,
+  `${PENCIL_PLEAT_CURTAINS_BASE}/ChatGPT Image Jun 22, 2026, 06_51_22 AM.png `,
+  `${PENCIL_PLEAT_CURTAINS_BASE}/ChatGPT Image Jun 22, 2026, 06_49_58 AM.png`,
 ];
+const PENCIL_PLEAT_CURTAINS_HERO_IMAGE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/pencil+pleat+curtains/ChatGPT+Image+Jun+22%2C+2026%2C+06_51_32+AM.png';
 
 export default function PencilPleatCurtains() {
   return (
@@ -24,7 +28,7 @@ export default function PencilPleatCurtains() {
         'Classic look',
         'Room versatile'
       ]}
-      heroImage={PENCIL_PLEAT_CURTAINS_S3_IMAGES[0]}
+      heroImage={PENCIL_PLEAT_CURTAINS_HERO_IMAGE}
       images={PENCIL_PLEAT_CURTAINS_S3_IMAGES}
     />
   );

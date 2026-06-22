@@ -1,10 +1,14 @@
 import ProductDetailLayout from '@/components/ProductDetailLayout';
 
+const MOTORISED_HERO_IMAGE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/motorised+blinds/ChatGPT+Image+Jun+22%2C+2026%2C+04_51_30+AM.png';
+
+const MOTORISED_BLINDS_BASE =
+  'https://nowest.s3.ap-south-1.amazonaws.com/collection/motorised+blinds';
 // S3 Images from Nowest_Image folder
 const MOTORISED_BLINDS_S3_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/attached_assets/stock_images/motorized_automated__978f737d.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape_Petal_White_Liv-1024x731.jpg.webp',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape_Roller_Kaleidoscope-Colour_BO_Kids-1024x731.jpg.webp',
+  `${MOTORISED_BLINDS_BASE}/A_sleek_and_powerful_executive_202606220451.jpeg`,
+  `${MOTORISED_BLINDS_BASE}/An_ultra-realistic_luxury_bathroom_photography_202606220451.jpeg`,
+  `${MOTORISED_BLINDS_BASE}/ChatGPT+Image+Jun+22%2C+2026%2C+04_51_47+AM.png`,
 ];
 
 export default function MotorisedBlinds() {
@@ -23,7 +27,7 @@ export default function MotorisedBlinds() {
         'Voice command compatible',
         'Programmable operation'
       ]}
-      heroImage={MOTORISED_BLINDS_S3_IMAGES[0]}
+      heroImage={MOTORISED_HERO_IMAGE}
       images={MOTORISED_BLINDS_S3_IMAGES}
     />
   );

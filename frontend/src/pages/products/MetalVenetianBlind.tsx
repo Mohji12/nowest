@@ -1,10 +1,12 @@
 import ProductDetailLayout from '@/components/ProductDetailLayout';
 
-// S3 Images from Nowest_Image folder
+const METAL_VENETIAN_BLINDS_BASE =
+  'https://nowest.s3.ap-south-1.amazonaws.com/collection/Metal+Venetian+Blind';
+
 const METAL_VENETIAN_BLINDS_S3_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/kelso-with-70mm-fascia-profile-in-black.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/sephora-sand-with-white-back-bar-1.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/IMG_0158-1920x1080.jpeg',
+  `${METAL_VENETIAN_BLINDS_BASE}/A_single_ultra-realistic_cinematic_dramatic_202606220240.jpeg`,
+  `${METAL_VENETIAN_BLINDS_BASE}/A_single_ultra-realistic_luxury_interior_202606220238.jpeg`,
+  `${METAL_VENETIAN_BLINDS_BASE}/ChatGPT+Image+Jun+22%2C+2026%2C+02_42_20+AM.png`,
 ];
 
 export default function MetalVenetianBlind() {
@@ -28,4 +30,3 @@ export default function MetalVenetianBlind() {
     />
   );
 }
-

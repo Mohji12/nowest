@@ -1,12 +1,15 @@
 import ProductDetailLayout from '@/components/ProductDetailLayout';
 
+const VERTICAL_BLINDS_COMMERCIAL_BASE =
+  'https://nowest.s3.ap-south-1.amazonaws.com/collection/vertical+commercial';
+
 // S3 Images from Nowest_Image folder
 const VERTICAL_BLINDS_COMMERCIAL_S3_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Portrait-Vertical_Collina_Diamond_Dust-700x500-1.jpg.webp',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Vert-Landscape-size-Petal-Terracotta_Bed_Main.jpg.webp',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Portrait-Vertical_Bamboo_pacific-700x500-1.jpg.webp',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape_Petal_White_Liv-1024x731.jpg.webp',
+  `${VERTICAL_BLINDS_COMMERCIAL_BASE}/A_vast_and_impressively_scaled_202606220610.jpeg`,
+  `${VERTICAL_BLINDS_COMMERCIAL_BASE}/A_dramatically_imposing_and_architecturally_202606220534.jpeg`,
+  `${VERTICAL_BLINDS_COMMERCIAL_BASE}/ChatGPT Image Jun 22, 2026, 05_33_53 AM.png`,
 ];
+const VERTICAL_BLINDS_COMMERCIAL_HERO_IMAGE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/vertical+commercial/ChatGPT+Image+Jun+22%2C+2026%2C+05_34_15+AM.png';
 
 export default function VerticalBlindsCommercial() {
   return (
@@ -24,7 +27,7 @@ export default function VerticalBlindsCommercial() {
         'Durable material',
         'Easy to maintain'
       ]}
-      heroImage={VERTICAL_BLINDS_COMMERCIAL_S3_IMAGES[0]}
+      heroImage={VERTICAL_BLINDS_COMMERCIAL_HERO_IMAGE}
       images={VERTICAL_BLINDS_COMMERCIAL_S3_IMAGES}
     />
   );

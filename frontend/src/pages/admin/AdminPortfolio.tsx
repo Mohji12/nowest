@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { getAdminPortfolio, createAdminPortfolioItem, updateAdminPortfolioItem, deleteAdminPortfolioItem } from '@/services/api';
+import { getPortfolioImageUrl } from '@/lib/s3Urls';
 import { useToast } from '@/hooks/use-toast';
 
 export default function AdminPortfolio() {
@@ -38,23 +39,7 @@ export default function AdminPortfolio() {
       if (!imagePath) {
         return '/api/placeholder/400/300';
       }
-      
-      // If it's already a full URL (S3 or any other), return as is
-      if (imagePath.startsWith('http')) {
-        return imagePath;
-      }
-      
-      // If it's a relative path, convert to S3 URL
-      if (imagePath.startsWith('/')) {
-        // Remove leading slash and construct S3 URL
-        const cleanPath = imagePath.substring(1);
-        const s3Url = `https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/attached_assets/${cleanPath}`;
-        return s3Url;
-      }
-      
-      // If it's a relative path without leading slash, add it
-      const s3Url = `https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/attached_assets/${imagePath}`;
-      return s3Url;
+      return getPortfolioImageUrl(imagePath) || '/api/placeholder/400/300';
     };
 
     // Check multiple possible image field names and convert to S3 URL

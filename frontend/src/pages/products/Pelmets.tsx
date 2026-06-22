@@ -1,12 +1,15 @@
 import ProductDetailLayout from '@/components/ProductDetailLayout';
 
+const PELMETS_BASE =
+  'https://nowest.s3.ap-south-1.amazonaws.com/collection/pelmets';
 // S3 Images from Nowest_Image folder
 const PELMETS_S3_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Allusion-Landscape-size-Shadow_Sand_Liv_Blue_walls_Open.jpg.webp',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Allusion-Landscape-size-Shadow_Stone_Liv_Green_Walls_Open.jpg.webp',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/strata-curtain.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Ella-Tilla-2.jpg',
+  `${PELMETS_BASE}/ChatGPT Image Jun 22, 2026, 06_42_57 AM.png`,
+  `${PELMETS_BASE}/ChatGPT Image Jun 22, 2026, 06_42_51 AM.png`,
+  `${PELMETS_BASE}/Generate_a_high-resolution_image_of_202606220642.jpeg`,
 ];
+
+const PELMETS_HERO_IMAGE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/pelmets/ChatGPT+Image+Jun+22%2C+2026%2C+06_42_05+AM.png';
 
 export default function Pelmets() {
   return (
@@ -24,7 +27,7 @@ export default function Pelmets() {
         'Bonded rails',
         'Decorative & functional'
       ]}
-      heroImage={PELMETS_S3_IMAGES[0]}
+      heroImage={PELMETS_HERO_IMAGE}
       images={PELMETS_S3_IMAGES}
     />
   );

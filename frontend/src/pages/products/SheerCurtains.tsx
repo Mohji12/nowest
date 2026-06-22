@@ -1,13 +1,16 @@
 import ProductDetailLayout from '@/components/ProductDetailLayout';
 
+const SHEER_CURTAINS_BASE =
+  'https://nowest.s3.ap-south-1.amazonaws.com/collection/sheer+curtains';
+
 // S3 Images from Nowest_Image folder
 const SHEER_CURTAINS_S3_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/voile-780x780.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape_Petal_White_Liv-1024x731.jpg.webp',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/strata-curtain.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Ella-Tilla-2.jpg',
+  `${SHEER_CURTAINS_BASE}/ChatGPT Image Jun 22, 2026, 06_35_50 AM.png`,
+  `${SHEER_CURTAINS_BASE}/Generate_a_high-resolution_image_of_202606220636.jpeg`,
+  `${SHEER_CURTAINS_BASE}/ChatGPT Image Jun 22, 2026, 06_36_15 AM.png `,
 ];
 
+const SHEER_HERO_IMAGE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/sheer+curtains/ChatGPT+Image+Jun+22%2C+2026%2C+06_36_27+AM.png';
 export default function SheerCurtains() {
   return (
     <ProductDetailLayout
@@ -24,7 +27,7 @@ export default function SheerCurtains() {
         'Privacy layer',
         'Texture options'
       ]}
-      heroImage={SHEER_CURTAINS_S3_IMAGES[0]}
+      heroImage={SHEER_HERO_IMAGE}
       images={SHEER_CURTAINS_S3_IMAGES}
     />
   );

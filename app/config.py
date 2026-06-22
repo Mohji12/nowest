@@ -10,7 +10,7 @@ class Settings:
     # Database settings - use environment variable if available, fallback to hardcoded
     database_url: str = os.getenv(
         "DATABASE_URL", 
-        "mysql+pymysql://admin:Mentee_tracker#2025@mentee.cr82604eu9d2.ap-south-1.rds.amazonaws.com:3306/nowest_interior"
+        "mysql+pymysql://adminuser:Mentee123%40@52.90.192.59:3306/nowest_interior"
     )
     
     # Security settings

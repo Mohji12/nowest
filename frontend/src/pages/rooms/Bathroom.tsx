@@ -1,17 +1,17 @@
 import RoomDetailLayout from '@/components/RoomDetailLayout';
 
-// S3 Images from Nowest_Image folder - Bathroom related images ONLY
-// All images should be specifically related to bathroom areas
+const BATHROOM_BASE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection';
+
 const BATHROOM_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Roll-Portrait-size-Azalea-Pink_BO_Bath.jpg.webp', // Bath = Bathroom specific
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Portrait-Vertical_Collina_Diamond_Dust-700x500-1.jpg.webp', // Vertical blinds - bathroom suitable
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Portrait-Vertical_Bamboo_pacific-700x500-1.jpg.webp', // Vertical blinds - bathroom suitable
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Verdant-Teal-Haven-Lipstick.jpg', // Bathroom suitable fabric
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/strata-curtain.jpg', // Bathroom suitable
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/voile-780x780.jpg', // Voile - bathroom suitable
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Lush-Maya-1-600x545.jpg', // Bathroom suitable fabric
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/belle-peony-300x300.jpg', // Bathroom suitable fabric
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/calista-mineral-300x300.jpg', // Bathroom suitable fabric
+  `${BATHROOM_BASE}/A_bright_family_bathroom_with_202606230251.jpeg`,
+  `${BATHROOM_BASE}/A_bright_family_bathroom_with_202606230254.jpeg`,
+  `${BATHROOM_BASE}/A_bright_family_bathroom_with_202606230255.jpeg`,
+  `${BATHROOM_BASE}/A_bright_modern_bathroom_with_202606230250.jpeg`,
+  `${BATHROOM_BASE}/A_cosy_vintage_bathroom_with_202606230251.jpeg`,
+  `${BATHROOM_BASE}/A_cosy_vintage_bathroom_with_202606230254.jpeg`,
+  `${BATHROOM_BASE}/A_sleek_contemporary_bathroom_with_202606230251.jpeg`,
+  `${BATHROOM_BASE}/A_sleek_contemporary_bathroom_with_202606230255.jpeg`,
+  `${BATHROOM_BASE}/A_stylish_industrial_bathroom_with_202606230257.jpeg`,
 ];
 
 export default function Bathroom() {
@@ -28,10 +28,3 @@ export default function Bathroom() {
     />
   );
 }
-
-
-
-
-
-
-

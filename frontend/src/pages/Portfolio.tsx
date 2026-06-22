@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import PortfolioGrid from '@/components/PortfolioGrid';
 import { getPortfolio } from '@/services/api';
+import { getPortfolioImageUrl, PORTFOLIO_HERO_IMAGE } from '@/lib/s3Urls';
 
 // Import fallback images
 import sheerImage from '@assets/generated_images/Luxury_sheer_curtains_hero_53aa2ee0.png';
@@ -48,50 +49,24 @@ export default function Portfolio() {
 
   // Process portfolio data with database images
   const portfolioItems = (portfolioData as any[])?.map((item: any) => {
-    // Handle both S3 URLs and relative paths from database
     const getImageUrl = (imagePath: string) => {
       if (!imagePath) return getPortfolioImage(item.title || '', item.category || '');
-      
-      // If it's already a full URL (S3 or any other), return as is
-      if (imagePath.startsWith('http')) {
-        console.log(`Using S3/External URL: ${imagePath}`);
-        return imagePath;
-      }
-      
-      // If it's a relative path, convert to S3 URL
-      if (imagePath.startsWith('/')) {
-        // Remove leading slash and construct S3 URL
-        const cleanPath = imagePath.substring(1);
-        const s3Url = `https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/attached_assets/${cleanPath}`;
-        console.log(`Converting relative path to S3 URL: ${imagePath} -> ${s3Url}`);
-        return s3Url;
-      }
-      
-      // If it's a relative path without leading slash, add it
-      const s3Url = `https://jgi-menteetracker.s3.ap-south-1.amazonaws.com/attached_assets/${imagePath}`;
-      console.log(`Converting relative path to S3 URL: ${imagePath} -> ${s3Url}`);
-      return s3Url;
+      return getPortfolioImageUrl(imagePath) || getPortfolioImage(item.title || '', item.category || '');
     };
 
-    // Debug: Log the image URL from database
-    if (item.image) {
-      const finalUrl = getImageUrl(item.image);
-      console.log(`Portfolio item "${item.title}" has image URL:`, item.image);
-      console.log(`Using URL:`, finalUrl);
-    } else {
-      console.log(`Portfolio item "${item.title}" has no image URL, using fallback`);
-    }
+    const imageUrl = getImageUrl(item.image);
+    if (!imageUrl) return null;
 
     return {
       id: item.id?.toString() || Math.random().toString(),
       title: item.title || 'Untitled Project',
       category: item.category && item.category !== 'general' ? item.category : undefined,
-      image: getImageUrl(item.image),
+      image: imageUrl,
       description: item.description || '',
       location: item.location || undefined,
       year: undefined, // Don't show year to avoid showing 2025
     };
-  }) || [
+  }).filter((item): item is NonNullable<typeof item> => item !== null) || [
     // Fallback data if API fails
     {
       id: '1',
@@ -123,8 +98,8 @@ export default function Portfolio() {
   ];
 
 
-  // Background image path - using portfolio image from S3
-  const portfolioImage = 'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape_Petal_White_Liv-1024x731.jpg.webp';
+  // Background image from nowest S3 collection folder
+  const portfolioImage = PORTFOLIO_HERO_IMAGE;
 
   if (isLoading) {
     return (

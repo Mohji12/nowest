@@ -1,11 +1,15 @@
 import ProductDetailLayout from '@/components/ProductDetailLayout';
 
+const PERFECT_FIT_BLINDS_BASE =
+  'https://nowest.s3.ap-south-1.amazonaws.com/collection/perfect+fit+blinds';
 // S3 Images from Nowest_Image folder
 const PERFECT_FIT_BLINDS_S3_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Portrait_Kitchen_Perfect_Fit_NG_Roller_Bubbles_White.jpg.webp',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/PFNG-Image.jpg.webp',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape-PF3.jpg.webp',
+  `${PERFECT_FIT_BLINDS_BASE}/A_beautifully_elegant_and_immaculately_202606220516.jpeg `,
+  `${PERFECT_FIT_BLINDS_BASE}/A_pristine_and_immaculately_styled_202606220515.jpeg `,
+  `${PERFECT_FIT_BLINDS_BASE}/ChatGPT Image Jun 22, 2026, 05_16_20 AM.png`,
 ];
+
+const PERFECT_FIT_BLINDS_HERO_IMAGE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/perfect+fit+blinds/ChatGPT+Image+Jun+22%2C+2026%2C+05_16_33+AM.png';
 
 export default function PerfectFitBlinds() {
   return (
@@ -23,7 +27,7 @@ export default function PerfectFitBlinds() {
         'Easy installation and removal',
         'Ideal for uPVC windows'
       ]}
-      heroImage={PERFECT_FIT_BLINDS_S3_IMAGES[0]}
+      heroImage={PERFECT_FIT_BLINDS_HERO_IMAGE}
       images={PERFECT_FIT_BLINDS_S3_IMAGES}
     />
   );

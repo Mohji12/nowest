@@ -103,7 +103,7 @@ export default function FloatingNav({ activeItem = 'home', items = defaultItems 
       const scrollContainer = scrollContainerRef.current;
       const navList = navListRef.current;
       let scrollPosition = 0;
-      const scrollSpeed = 1.5; // Increased speed for more visible scrolling (pixels per frame)
+      const scrollSpeed = 0.45; // Slower auto-scroll on mobile (pixels per frame at 60fps)
       let lastTime = performance.now();
 
       // Debug logging
@@ -346,6 +346,7 @@ export default function FloatingNav({ activeItem = 'home', items = defaultItems 
             overflowX: 'auto',
             overflowY: 'hidden',
             WebkitOverflowScrolling: 'touch',
+            scrollBehavior: 'smooth',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
             width: '100%',

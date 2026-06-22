@@ -16,6 +16,7 @@ import cellularBlindsImg from '@assets/stock_images/pleated_honeycomb_bl_2663b2e
 // S3 URLs
 const MOTORIZED_BLINDS_S3_URL = 'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/attached_assets/stock_images/motorized_automated__978f737d.jpg';
 const PLEATED_PANEL_BLINDS_S3_URL = 'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/attached_assets/stock_images/panel_blinds_sliding_0c1c0c07.jpg';
+const CONSERVATORY_BLINDS_S3_URL = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/conservatory+blinds/A_spacious_and_airy_Edwardian_202606220345.jpeg';
 const VERTICAL_BLINDS_S3_URL = 'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Portrait-Vertical_Collina_Diamond_Dust-700x500-1.jpg.webp';
 
 // Product types data
@@ -65,7 +66,7 @@ const productTypes = [
   {
     id: 'conservatory-blinds',
     name: 'Conservatory Blinds',
-    image: rollerBlindsImg,
+    image: CONSERVATORY_BLINDS_S3_URL,
     description: 'Specialized blinds designed for conservatories and sunrooms.',
   },
   {

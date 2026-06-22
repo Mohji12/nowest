@@ -1,10 +1,15 @@
 import ProductDetailLayout from '@/components/ProductDetailLayout';
 
+const PLEATED_HERO_IMAGE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/Pleated+Blinds/ChatGPT+Image+Jun+22%2C+2026%2C+03_22_26+AM.png';
+
+const PLEATED_BLINDS_BASE =
+  'https://nowest.s3.ap-south-1.amazonaws.com/collection/Pleated+Blinds';
+
 // S3 Images from Nowest_Image folder
 const PLEATED_BLINDS_S3_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/attached_assets/stock_images/panel_blinds_sliding_0c1c0c07.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape-size-Birdsong-Colour-Crush_Kit.jpg.webp',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape_Petal_White_Liv-1024x731.jpg.webp',
+  `${PLEATED_BLINDS_BASE}/A_single_ultra-realistic_luxury_interior_202606220321.jpeg`,
+  `${PLEATED_BLINDS_BASE}/An_ultra-realistic_warm_and_gentle_202606220322.jpeg`,
+  `${PLEATED_BLINDS_BASE}/ChatGPT+Image+Jun+22%2C+2026%2C+03_21_52+AM.png`,
 ];
 
 export default function PleatedBlinds() {
@@ -23,7 +28,7 @@ export default function PleatedBlinds() {
         'Ideal for conservatories and skylights',
         'Available in various colours and textures'
       ]}
-      heroImage={PLEATED_BLINDS_S3_IMAGES[0]}
+      heroImage={PLEATED_HERO_IMAGE}
       images={PLEATED_BLINDS_S3_IMAGES}
     />
   );

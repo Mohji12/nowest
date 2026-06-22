@@ -23,6 +23,7 @@ import motorizedBlindsImg from '@assets/stock_images/motorized_automated__4b820a
 // S3 image URLs for products
 const MOTORIZED_BLINDS_S3_URL = 'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/attached_assets/stock_images/motorized_automated__978f737d.jpg';
 const PLEATED_PANEL_BLINDS_S3_URL = 'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/attached_assets/stock_images/panel_blinds_sliding_0c1c0c07.jpg';
+const CONSERVATORY_BLINDS_S3_URL = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/conservatory+blinds/A_spacious_and_airy_Edwardian_202606220345.jpeg';
 
 export default function Products() {
   const [selectedCategory, setSelectedCategory] = useState('blinds');
@@ -163,6 +164,38 @@ export default function Products() {
   if (!products.brochures) {
     products.brochures = [];
   }
+
+  // Add static blinds products missing from the API (e.g. Conservatory Blinds)
+  if (productsData && Object.keys(products).length > 0) {
+    if (!products.blinds) {
+      products.blinds = [];
+    }
+
+    const staticBlindsProducts = [
+      {
+        id: 'static-conservatory-blinds',
+        productId: 'conservatory-blinds',
+        name: 'Conservatory Blinds',
+        description: 'Specialized blinds designed for conservatories and sunrooms. Control heat and light in your glass extension.',
+        image: CONSERVATORY_BLINDS_S3_URL,
+        features: ['Conservatory specific', 'Heat control', 'Light management', 'Specialized design'],
+        category: 'blinds',
+        status: 'active',
+      },
+    ];
+
+    staticBlindsProducts.forEach((staticProduct) => {
+      const exists = products.blinds.some(
+        (p: any) =>
+          p.productId === staticProduct.productId ||
+          (p.name || '').toLowerCase().includes('conservatory')
+      );
+
+      if (!exists) {
+        products.blinds.push(staticProduct);
+      }
+    });
+  }
   
   // If no API data or brochures is empty, use fallback data
   const finalProducts = !productsData || Object.keys(products).length === 0 ? {
@@ -220,7 +253,7 @@ export default function Products() {
         productId: 'conservatory-blinds',
         name: 'Conservatory Blinds', 
         description: 'Specialized blinds designed for conservatories and sunrooms. Control heat and light in your glass extension.', 
-        image: rollerBlindsImg,
+        image: CONSERVATORY_BLINDS_S3_URL,
         features: ['Conservatory specific', 'Heat control', 'Light management', 'Specialized design']
       },
       { 
@@ -462,6 +495,7 @@ export default function Products() {
     }
     if (nameKey.includes('shutter')) return shuttersImg;
     if (nameKey.includes('motorized') || nameKey.includes('motorised') || nameKey.includes('automated') || nameKey.includes('motor')) return MOTORIZED_BLINDS_S3_URL;
+    if (nameKey.includes('conservatory')) return CONSERVATORY_BLINDS_S3_URL;
     if (nameKey.includes('pleated') || nameKey.includes('panel') || nameKey.includes('cellular') || nameKey.includes('honeycomb')) return PLEATED_PANEL_BLINDS_S3_URL;
     
     // Check category

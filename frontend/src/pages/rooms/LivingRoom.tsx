@@ -1,17 +1,17 @@
 import RoomDetailLayout from '@/components/RoomDetailLayout';
 
-// S3 Images from Nowest_Image folder - Living Room related images ONLY
-// All images should be specifically related to living room areas
+const LIVING_ROOM_BASE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/living+room';
+
 const LIVING_ROOM_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape_Petal_White_Liv-1024x731.jpg.webp', // Liv = Living Room specific
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Allusion-Landscape-size-Shadow_Sand_Liv_Blue_walls_Open.jpg.webp', // Liv = Living Room specific
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Allusion-Landscape-size-Shadow_Stone_Liv_Green_Walls_Open.jpg.webp', // Liv = Living Room specific
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Allusion-Portrait-size-Natural_Grey_Cameo_Fabric.jpg.webp', // Living room suitable
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/sephora-sand-with-white-back-bar-1.jpg', // Living room suitable
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Flock-Melody-2-780x780.jpg', // Living room suitable fabric
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Mythic-Ecru.jpg', // Living room suitable fabric
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Ortega-Cranberry-Haven-Sky.jpg', // Living room suitable fabric
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Ella-Tilla-2.jpg', // Living room suitable fabric
+  `${LIVING_ROOM_BASE}/A_bright_contemporary_living_room_202606230333.jpeg`,
+  `${LIVING_ROOM_BASE}/A_bright_playful_retro_70s_202606230333.jpeg`,
+  `${LIVING_ROOM_BASE}/A_dreamy_romantic_living_room_202606230333.jpeg`,
+  `${LIVING_ROOM_BASE}/A_grand_traditional_living_room_202606230333.jpeg`,
+  `${LIVING_ROOM_BASE}/A_serene_Japandi_living_room_202606230333.jpeg`,
+  `${LIVING_ROOM_BASE}/A_sophisticated_Art_Deco_living_202606230333.jpeg`,
+  `${LIVING_ROOM_BASE}/A_stunning_modern_tropical_living_202606230345.jpeg`,
+  `${LIVING_ROOM_BASE}/A_vibrant_eclectic_living_room_202606230333.jpeg`,
+  `${LIVING_ROOM_BASE}/A_warm_rustic_farmhouse_living_202606230333.jpeg`,
 ];
 
 export default function LivingRoom() {
@@ -28,4 +28,3 @@ export default function LivingRoom() {
     />
   );
 }
-

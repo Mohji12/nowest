@@ -1,12 +1,15 @@
 import ProductDetailLayout from '@/components/ProductDetailLayout';
 
+const FIRE_RETARDANT_CURTAINS_BASE =
+  'https://nowest.s3.ap-south-1.amazonaws.com/collection/fire+retardant+curtains';
+
 // S3 Images from Nowest_Image folder
 const FIRE_RETARDANT_CURTAINS_S3_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/strata-curtain.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Ella-Tilla-2.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Flock-Melody-2-780x780.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Mythic-Ecru.jpg',
+  `${FIRE_RETARDANT_CURTAINS_BASE}/A_spectacular_and_opulently_styled_202606220524.jpeg`,
+  `${FIRE_RETARDANT_CURTAINS_BASE}/A_sleek_and_impressively_professional_202606220524.jpeg`,
+  `${FIRE_RETARDANT_CURTAINS_BASE}/ChatGPT Image Jun 22, 2026, 05_23_43 AM.png`,
 ];
+const FIRE_RETARDANT_CURTAINS_HERO_IMAGE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/fire+retardant+curtains/ChatGPT+Image+Jun+22%2C+2026%2C+05_24_17+AM.png';
 
 export default function FireRetardantCurtains() {
   return (
@@ -24,7 +27,7 @@ export default function FireRetardantCurtains() {
         'Durable fabric',
         'Regulation compliant'
       ]}
-      heroImage={FIRE_RETARDANT_CURTAINS_S3_IMAGES[0]}
+      heroImage={FIRE_RETARDANT_CURTAINS_HERO_IMAGE}
       images={FIRE_RETARDANT_CURTAINS_S3_IMAGES}
     />
   );

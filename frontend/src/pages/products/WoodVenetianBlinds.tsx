@@ -1,13 +1,16 @@
 import ProductDetailLayout from '@/components/ProductDetailLayout';
 
+const WOOD_VENETIAN_BLINDS_BASE =
+  'https://nowest.s3.ap-south-1.amazonaws.com/collection/wood+venetian+blinds';
+
 // S3 Images from Nowest_Image folder
 const WOOD_VENETIAN_BLINDS_S3_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/kelso-with-70mm-fascia-profile-in-black.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/sephora-sand-with-white-back-bar-1.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/IMG_0158-1920x1080.jpeg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/IMG_0165-rotated.jpeg',
+  `${WOOD_VENETIAN_BLINDS_BASE}/A_magnificent_and_dramatically_atmospheric_202606220508.jpeg `,
+  `${WOOD_VENETIAN_BLINDS_BASE}/An_ultra-realistic_interior_photography_image_202606220508.jpeg `,
+  `${WOOD_VENETIAN_BLINDS_BASE}/ChatGPT Image Jun 22, 2026, 05_08_21 AM.png `,
 ];
 
+const WOOD_VENETIAN_HERO_IMAGE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/wood+venetian+blinds/ChatGPT+Image+Jun+22%2C+2026%2C+05_08_49+AM.png';
 export default function WoodVenetianBlinds() {
   return (
     <ProductDetailLayout
@@ -24,7 +27,7 @@ export default function WoodVenetianBlinds() {
         'Natural insulation properties',
         'Timeless elegance'
       ]}
-      heroImage={WOOD_VENETIAN_BLINDS_S3_IMAGES[0]}
+      heroImage={WOOD_VENETIAN_HERO_IMAGE}
       images={WOOD_VENETIAN_BLINDS_S3_IMAGES}
     />
   );

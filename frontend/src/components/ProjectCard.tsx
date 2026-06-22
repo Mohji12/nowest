@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { getPortfolioImageCandidates } from '@/lib/s3Urls';
 
 interface ProjectCardProps {
   id: string;
@@ -12,52 +13,24 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ id, title, category, image, description, location, year, onClick }: ProjectCardProps) {
-  // Handle image loading errors with S3 bucket name fallback
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    const target = e.currentTarget;
-    const currentSrc = target.src;
-    console.error(`[ProjectCard] Image failed to load for "${title}":`, currentSrc);
-    
-    // Try alternative bucket name if it's an S3 URL
-    if (currentSrc.includes('jgi-menteetrackers')) {
-      const altUrl = currentSrc.replace('jgi-menteetrackers', 'jgi-menteetracker');
-      console.log(`[ProjectCard] Trying alternative bucket URL:`, altUrl);
-      target.src = altUrl;
-      target.onerror = null;
-      return;
-    }
-    
-    if (currentSrc.includes('jgi-menteetracker') && !currentSrc.includes('LOGO PNG')) {
-      const altUrl = currentSrc.replace('jgi-menteetracker', 'jgi-menteetrackers');
-      console.log(`[ProjectCard] Trying alternative bucket URL:`, altUrl);
-      target.src = altUrl;
-      target.onerror = null;
-      return;
-    }
-    
-    // Try to use a fallback image
-    const fallbackImage = '/assets/LOGO PNG.png';
-    
-    // Only set fallback if we haven't already tried it
-    if (target.src !== fallbackImage && !target.src.includes('LOGO PNG')) {
-      console.log(`[ProjectCard] Using fallback image for "${title}"`);
-      target.src = fallbackImage;
-      target.className = 'w-full h-full object-contain p-4 transition-all duration-700 group-hover:scale-110';
-      target.onerror = null; // Prevent infinite loop
-    } else {
-      // If fallback also fails, hide the image
-      target.style.display = 'none';
-    }
-  };
+  const imageCandidates = image ? getPortfolioImageCandidates(image) : [];
+  const [candidateIndex, setCandidateIndex] = useState(0);
+  const [imageFailed, setImageFailed] = useState(false);
+  const currentImage = imageCandidates[candidateIndex];
 
-  // Log image URL for debugging
   React.useEffect(() => {
-    if (image) {
-      console.log(`[ProjectCard] Loading image for "${title}":`, image);
-    } else {
-      console.warn(`[ProjectCard] No image provided for "${title}"`);
+    setCandidateIndex(0);
+    setImageFailed(false);
+  }, [image]);
+
+  const handleImageError = () => {
+    const nextIndex = candidateIndex + 1;
+    if (nextIndex < imageCandidates.length) {
+      setCandidateIndex(nextIndex);
+      return;
     }
-  }, [image, title]);
+    setImageFailed(true);
+  };
 
   return (
     <div
@@ -67,24 +40,17 @@ export default function ProjectCard({ id, title, category, image, description, l
     >
       {/* Image Section */}
       <div className="aspect-[4/3] overflow-hidden relative bg-gray-100">
-        {image ? (
+        {currentImage && !imageFailed ? (
           <img
-            src={image}
+            src={currentImage}
             alt={title}
             className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
             data-testid={`img-project-${id}`}
             onError={handleImageError}
-            onLoad={() => {
-              console.log(`[ProjectCard] Image loaded successfully for "${title}":`, image);
-            }}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-100">
-            <img
-              src="/assets/LOGO PNG.png"
-              alt={title}
-              className="w-24 h-24 object-contain opacity-50"
-            />
+          <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm px-4 text-center">
+            Image unavailable
           </div>
         )}
         

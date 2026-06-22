@@ -1,12 +1,15 @@
 import ProductDetailLayout from '@/components/ProductDetailLayout';
 
+const EYELET_CURTAINS_BASE =
+  'https://nowest.s3.ap-south-1.amazonaws.com/collection/eyelet+curtains';
 // S3 Images from Nowest_Image folder
 const EYELET_CURTAINS_S3_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/strata-curtain.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Ella-Tilla-2.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Flock-Melody-2-780x780.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Flores-Biscuit.jpg',
+  `${EYELET_CURTAINS_BASE}/Generate_a_high-resolution_image_of_202606220807.jpeg  `,
+  `${EYELET_CURTAINS_BASE}/ChatGPT Image Jun 22, 2026, 08_08_41 AM.png `,
+  `${EYELET_CURTAINS_BASE}/ChatGPT Image Jun 22, 2026, 08_08_48 AM.png `,
 ];
+
+const EYELET_CURTAINS_HERO_IMAGE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/eyelet+curtains/ChatGPT+Image+Jun+22%2C+2026%2C+08_07_24+AM.png';
 
 export default function EyeletCurtains() {
   return (
@@ -24,7 +27,7 @@ export default function EyeletCurtains() {
         'Easy operation',
         'Low maintenance'
       ]}
-      heroImage={EYELET_CURTAINS_S3_IMAGES[0]}
+      heroImage={EYELET_CURTAINS_HERO_IMAGE}
       images={EYELET_CURTAINS_S3_IMAGES}
     />
   );

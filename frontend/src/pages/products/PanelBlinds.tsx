@@ -1,10 +1,15 @@
 import ProductDetailLayout from '@/components/ProductDetailLayout';
 
+const PANEL_HERO_IMAGE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/panel+blinds/ChatGPT+Image+Jun+22%2C+2026%2C+04_27_43+AM.png';
+
+const PANEL_BLINDS_BASE =
+  'https://nowest.s3.ap-south-1.amazonaws.com/collection/panel+blinds';
+
 // S3 Images from Nowest_Image folder
 const PANEL_BLINDS_S3_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/attached_assets/stock_images/panel_blinds_sliding_0c1c0c07.jpg',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Portrait-Vertical_Collina_Diamond_Dust-700x500-1.jpg.webp',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape_Petal_White_Liv-1024x731.jpg.webp',
+  `${PANEL_BLINDS_BASE}/A_serene_and_airy_Scandinavian-inspired_202606220428.jpeg`,
+  `${PANEL_BLINDS_BASE}/An_ultra-realistic_interior_photography_image_202606220428.jpeg`,
+  `${PANEL_BLINDS_BASE}/ChatGPT+Image+Jun+22%2C+2026%2C+04_27_43+AM.png`,
 ];
 
 export default function PanelBlinds() {
@@ -23,7 +28,7 @@ export default function PanelBlinds() {
         'Smooth operation',
         'Contemporary style'
       ]}
-      heroImage={PANEL_BLINDS_S3_IMAGES[0]}
+      heroImage={PANEL_HERO_IMAGE}
       images={PANEL_BLINDS_S3_IMAGES}
     />
   );

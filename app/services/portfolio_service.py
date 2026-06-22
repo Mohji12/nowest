@@ -9,7 +9,7 @@ import logging
 
 from models.portfolio import Portfolio
 from schemas.portfolio import PortfolioCreate, PortfolioUpdate
-from utils.s3_utils import convert_image_to_s3_url
+from utils.s3_utils import convert_portfolio_image_to_s3_url
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class PortfolioService:
             Portfolio with converted image URL
         """
         if portfolio.image:
-            portfolio.image = convert_image_to_s3_url(portfolio.image)
+            portfolio.image = convert_portfolio_image_to_s3_url(portfolio.image)
         return portfolio
     
     def get_all_portfolio(self) -> List[Portfolio]:
@@ -43,10 +43,13 @@ class PortfolioService:
         """
         try:
             portfolio_items = self.db.query(Portfolio).order_by(desc(Portfolio.created_at)).all()
-            # Convert image paths to full S3 URLs
+            # Convert image paths to full S3 URLs and drop items without a valid image
+            valid_items = []
             for portfolio in portfolio_items:
                 self._convert_portfolio_image(portfolio)
-            return portfolio_items
+                if portfolio.image:
+                    valid_items.append(portfolio)
+            return valid_items
         except Exception as e:
             logger.error(f"Error getting all portfolio items: {e}")
             raise HTTPException(
@@ -88,7 +91,7 @@ class PortfolioService:
         """
         try:
             # Convert image path to full S3 URL if needed
-            image_url = convert_image_to_s3_url(portfolio_data.image)
+            image_url = convert_portfolio_image_to_s3_url(portfolio_data.image)
             
             portfolio = Portfolio(
                 title=portfolio_data.title,
@@ -135,7 +138,7 @@ class PortfolioService:
             
             # Convert image path to full S3 URL if image is being updated
             if "image" in update_data and update_data["image"] is not None:
-                update_data["image"] = convert_image_to_s3_url(update_data["image"])
+                update_data["image"] = convert_portfolio_image_to_s3_url(update_data["image"])
             
             for field, value in update_data.items():
                 setattr(portfolio, field, value)

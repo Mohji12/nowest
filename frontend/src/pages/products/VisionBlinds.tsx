@@ -1,10 +1,15 @@
-import ProductDetailLayout from '@/components/ProductDetailLayout';
+import ProductDetailLayout from '@/components/ProductDetailLayout'
+
+const VISION_HERO_IMAGE = 'https://nowest.s3.ap-south-1.amazonaws.com/collection/vision+blinds/A_sweeping_and_elegant_open-plan_202606220500.jpeg';
+
+const VISION_BLINDS_BASE =
+  'https://nowest.s3.ap-south-1.amazonaws.com/collection/vision+blinds';
 
 // S3 Images from Nowest_Image folder
 const VISION_BLINDS_S3_IMAGES = [
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape-size-Birdsong-Colour-Crush_Kit.jpg.webp',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape_Petal_White_Liv-1024x731.jpg.webp',
-  'https://jgi-menteetrackers.s3.ap-south-1.amazonaws.com/Nowest_Image/Landscape_Roller_Kaleidoscope-Colour_BO_Kids-1024x731.jpg.webp',
+  `${VISION_BLINDS_BASE}/A_beautifully_composed_modern_ground_202606220500.jpeg`,
+  `${VISION_BLINDS_BASE}/ChatGPT Image Jun 22, 2026, 05_00_06 AM.png`,
+  `${VISION_BLINDS_BASE}/ChatGPT Image Jun 22, 2026, 05_00_24 AM.png`,
 ];
 
 export default function VisionBlinds() {
@@ -23,7 +28,7 @@ export default function VisionBlinds() {
         'Perfect for ground floor windows',
         'Available in multiple colours'
       ]}
-      heroImage={VISION_BLINDS_S3_IMAGES[0]}
+      heroImage={VISION_HERO_IMAGE}
       images={VISION_BLINDS_S3_IMAGES}
     />
   );
